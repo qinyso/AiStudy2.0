@@ -27,7 +27,8 @@ import {
   TrophyOutlined,
   TeamOutlined,
   LoginOutlined,
-  UserAddOutlined
+  UserAddOutlined,
+  MonitorOutlined,
 } from '@ant-design/icons';
 
 
@@ -37,9 +38,9 @@ const { Header } = Layout;
   const menuItems = [
     {
       key: '1',
-      label: '首页',
-      path:'/home',
-    icon: <HomeOutlined />,
+      label: '最新获取',
+      path:'/get',
+    icon: <MonitorOutlined />,
   },
   {
     key: '2',
@@ -104,7 +105,9 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
 
   // 头部样式 - 科技感深色主题
   const headerStyle = {
-    background: 'linear-gradient(90deg, #0f172a, #1e293b)',
+     background: 'linear-gradient(135deg,rgb(5, 7, 8) 0%, #0a1128 50%, #0f172a 100%)',
+   
+      backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(11, 88, 252, 0.15) 0%, transparent 20%), radial-gradient(circle at 80% 70%, rgba(11, 88, 252, 0.1) 0%, transparent 30%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -157,7 +160,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     <Header style={headerStyle}>
    
       
-      {/* 品牌标识 */}
+  
       <div style={logoStyle}>
         <span style={{ 
           background: 'transparent',
@@ -165,7 +168,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
           backgroundClip: 'text',
           color: colorPrimary, 
         }}>
-         智慧医疗
+         智慧论文检索
         </span>
       </div>
       
