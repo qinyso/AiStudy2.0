@@ -1,5 +1,5 @@
 import React from 'react';
-import TopBar from './TopBar.jsx';
+import TopBar from './TopBar/TopBar.jsx';
 import AppRoutes from '../router/index.jsx';
 import { Layout } from 'antd';
 const { Header, Content, Footer ,Sider} = Layout;

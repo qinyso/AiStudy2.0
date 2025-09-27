@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { themeColors } from '../theme';
+import { themeColors } from '../../theme';
 import { 
   Layout, 
   theme, 
@@ -30,7 +30,7 @@ import {
   UserAddOutlined,
   MonitorOutlined,
 } from '@ant-design/icons';
-
+import './TopBar.css';
 
 const { Header } = Layout;
 
@@ -44,28 +44,15 @@ const { Header } = Layout;
   },
   {
     key: '2',
-    label: '消息',
-    path:'/Message',
-    icon: <MessageOutlined />,
-  },
-  {
-    key: '3',
-    label: '案例',
-    path:'/Case',
+    label: '研究领域',
+    path:'/field',
     icon: <FileTextOutlined />,
   },
   {
-    key: '4',
-    label: '成就',
-    path:'/Achievement',  
-    icon: <TrophyOutlined />,
-  },
-  {
-    key: '5',
-    label: '团队',
-  
-    path:'/Team', 
-    icon: <TeamOutlined />,
+    key: '3',
+    label: '单篇处理',
+    path:'/single',
+    icon: <MessageOutlined />,
   },
 ];
 

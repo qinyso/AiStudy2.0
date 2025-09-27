@@ -1,7 +1,7 @@
 // 主题颜色配置
 export const themeColors = {
   // 主色调
-  colorPrimary: 'rgb(11, 88, 252)',
+  colorPrimary: '#165DFF',
   
   // 背景色
   colorBgContainer: '#1e293b',

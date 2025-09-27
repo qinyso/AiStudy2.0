@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { Routes, Route } from 'react-router-dom';
-import Get from '../pages/Get';
+import Get from '../pages/Get/Get';
 import Enter from '../pages/Enter';
-import Case from '../pages/Case';
-import Achivement from '../pages/Achivement';
-import Team from '../pages/Team';
+import Field from '../pages/Field';
+import Single from '../pages/Single';
  
 const AppRoutes = () => {
   return (
@@ -13,9 +12,8 @@ const AppRoutes = () => {
       <Route path="/" element={<Get />} />
       <Route path="/get" element={<Get />} />
       <Route path="/enter" element={<Enter />} />
-      <Route path="/case" element={<Case />} />
-      <Route path="/achivement" element={<Achivement />} />
-      <Route path="/team" element={<Team />} />
+      <Route path="/field" element={<Field />} />
+      <Route path="/single" element={<Single />} />
     </Routes>
   );
 };
