@@ -3,7 +3,7 @@ import React from 'react'
 const Enter = () => {
   return (
     <div>
-      <h1>Enter</h1>
+      <h1>登录</h1>
     </div>
   )
 }

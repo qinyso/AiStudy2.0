@@ -1,12 +1,17 @@
 import { Upload, Button, Card, Statistic, Row, Col, Divider, Typography, message, Input, Tag } from 'antd';
 import { SearchOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
-import './Get.css';
 
+import './Get.css';
+import axios from 'axios';
 import { themeColors } from '../../theme';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea} = Input;
+
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000'
+})
 const Get = () => {
 
   const { colorPrimary, colorBgContainer, colorText } = themeColors;
@@ -14,6 +19,9 @@ const Get = () => {
   
   const [TextAreaValue, setTextAreaValue] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   
   // 添加页面加载动画效果
   useEffect(() => {
@@ -28,6 +36,41 @@ const Get = () => {
   
   const handleTagClick = (tag) => {
     setTextAreaValue(tag);
+  };
+
+  const handleSearch = () => {
+    if (TextAreaValue.trim()) {
+      setIsSearching(true);
+      setSearchError(null);
+      
+      // 准备请求数据，与Python接口的QueryRequest模型匹配
+      const requestData = {
+        field_of_interest: TextAreaValue,
+        deepseek_api_key: 'sk-9b6cdeb495a241a28fba5ee3342b0155',
+        qwen_api_key: '',
+        max_docs: 5  
+      };
+      
+      // 发送POST请求到Python接口的multiplepapers端点
+      api.post('/multiplepapers', requestData)
+        .then(res => {
+          console.log('搜索结果:', res.data);
+          // 格式化结果以适应前端展示
+          const formattedResults = [{
+            title: '搜索结果摘要',
+            abstract: res.data.final_summary || '暂无摘要信息',
+            authors: '系统生成'
+          }];
+          setSearchResults(formattedResults);
+        })
+        .catch(err => {
+          console.error('搜索出错:', err);
+          setSearchError('搜索失败，请确保Python服务已启动并稍后重试');
+        })
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }
   };
 
 
@@ -158,7 +201,8 @@ const Get = () => {
                 fontSize: '16px',
                 transition: 'all 0.3s ease',
                 '&::placeholder': {
-                  color: 'white'
+                  color: 'white',
+                  opacity: 0.8
                 },
                 '&:focus': {
                   borderColor: '#38bdf8',
@@ -170,6 +214,7 @@ const Get = () => {
               type="primary" 
               icon={<ArrowRightOutlined />}
               size="large"
+              onClick={() => handleSearch()}
               style={{ 
                 backgroundColor: '#38bdf8',
                 borderColor: '#38bdf8',
@@ -188,7 +233,7 @@ const Get = () => {
                   boxShadow: '0 8px 20px rgba(56, 189, 248, 0.4)'
                 },
                 '&::after': {
-                  content: '1',
+                  content: '""',
                   position: 'absolute',
                   top: '50%',
                   left: '-50%',
@@ -276,7 +321,74 @@ const Get = () => {
         </div>
       </Card>
 
-   
+      {/* 搜索结果展示区域 */}
+      {isSearching || searchResults.length > 0 || searchError || (TextAreaValue && !isLoaded) ? (
+        <Card style={{
+          marginTop: '24px',
+          backgroundColor: 'rgba(15, 23, 42, 0.8)',
+          borderRadius: '16px',
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px rgba(56, 189, 248, 0.1)',
+          backdropFilter: 'blur(12px)'
+        }}>
+          <div style={{ padding: '24px' }}>
+            {/* 搜索结果标题 */}
+            {TextAreaValue && (
+              <Title level={4} style={{ color: 'white', marginBottom: '24px' }}>
+                搜索结果: "{TextAreaValue}"
+              </Title>
+            )}
+            
+            {/* 加载状态 */}
+            {isSearching ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 0' }}>
+                <Spin size="large" tip="正在搜索..." style={{ color: '#38bdf8' }} />
+              </div>
+            ) : (
+              /* 搜索结果列表 */
+              <> 
+                {searchError ? (
+                  <div style={{ textAlign: 'center', color: '#f87171', padding: '40px 0' }}>
+                    {searchError}
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                    {searchResults.map((paper, index) => (
+                      <Card 
+                        key={index} 
+                        style={{ 
+                          marginBottom: '16px', 
+                          backgroundColor: 'rgba(30, 41, 59, 0.8)',
+                          borderColor: 'rgba(56, 189, 248, 0.2)',
+                          color: 'white'
+                        }}
+                      >
+                        <Title level={5} style={{ color: '#38bdf8', marginBottom: '8px' }}>
+                          {paper.title || '无标题'}
+                        </Title>
+                        <Paragraph style={{ color: '#cbd5e1', marginBottom: '8px' }}>
+                          {paper.abstract || '无摘要信息'}
+                        </Paragraph>
+                        {paper.authors && (
+                          <Text style={{ color: '#94a3b8' }}>
+                            作者: {paper.authors}
+                          </Text>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                ) : TextAreaValue ? (
+                  <Empty 
+                    description="暂无搜索结果"
+                    style={{ color: '#94a3b8' }}
+                  />
+                ) : null}
+              </>
+            )}
+          </div>
+        </Card>
+      ) : null}
+
       <Card style={{ 
         backgroundColor: 'rgba(30, 41, 59, 0.8)',
         backdropFilter: 'blur(12px)',
