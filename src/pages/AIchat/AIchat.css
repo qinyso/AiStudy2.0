@@ -1,0 +1,56 @@
+/* AIchat.css */
+
+/* 滚动条样式美化 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.5);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.7);
+}
+
+/* 消息列表滚动容器 */
+.ant-input,
+.ant-input:hover,
+.ant-input:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(14, 165, 233, 0.5);
+}
+
+.ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 按钮样式覆盖 */
+.ant-btn {
+  transition: all 0.3s ease;
+}
+
+/* 防止文本选择时的样式干扰 */
+::selection {
+  background: rgba(14, 165, 233, 0.3);
+  color: #ffffff;
+}
+
+/* 确保消息区域在小屏幕上也能良好显示 */
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - 150px) !important;
+  }
+  
+  .message-content {
+    max-width: 85% !important;
+  }
+}

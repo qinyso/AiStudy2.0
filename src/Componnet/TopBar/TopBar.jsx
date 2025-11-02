@@ -34,26 +34,23 @@ import './TopBar.css';
 
 const { Header } = Layout;
 
-// 导航菜单项配置
+// 导航菜单项配置 - 与首页保持一致
   const menuItems = [
-    {
-      key: '1',
-      label: '最新获取',
-      path:'/get',
-    icon: <MonitorOutlined />,
+     {
+    key:'1',
+    label:'首页',
+    path:'/',
+    icon: <HomeOutlined />,
   },
+    
   {
-    key: '2',
-    label: '研究领域',
-    path:'/field',
-    icon: <FileTextOutlined />,
+    key:'2',
+    label:'智慧助理',
+    path:'/AIchat',
+    icon: <TrophyOutlined />,
   },
-  {
-    key: '3',
-    label: '单篇处理',
-    path:'/single',
-    icon: <MessageOutlined />,
-  },
+ 
+
 ];
 
 // 用户下拉菜单
@@ -90,17 +87,18 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     }
   };
 
-  // 头部样式 - 科技感深色主题
+  // 与首页完全一致的头部背景样式
   const headerStyle = {
-     background: 'linear-gradient(135deg,rgb(5, 7, 8) 0%, #0a1128 50%, #0f172a 100%)',
-   
-      backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(11, 88, 252, 0.15) 0%, transparent 20%), radial-gradient(circle at 80% 70%, rgba(11, 88, 252, 0.1) 0%, transparent 30%)',
+    background: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #0f172a 100%)',
+    backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '0 24px',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
+    height: 54,
     zIndex: 1,
+    position: 'sticky',
+    top: 0,
   };
   
   // 品牌标识样式
@@ -109,18 +107,18 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     alignItems: 'center',
     color: '#fff',
     fontWeight: 600,
-    fontSize: 18,
+    fontSize: 20,
     letterSpacing: 0.5,
   };
   
   // 搜索框样式
   const searchStyle = {
     width: 200,
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    background: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(14, 165, 233, 0.5)',
     color: '#fff',
     '&::placeholder': {
-      color: 'rgba(255, 255, 255, 0.5)',
+      color: 'rgba(255, 255, 255, 0.7)',
     },
   };
   
@@ -130,16 +128,18 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     border: 'none',
   };
   
-  // 菜单项样式
+  // 简化的菜单项样式 - 与首页融为一体
   const menuItemStyle = {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: 500,
     '&:hover': {
-      color: colorPrimary,
+      color: '#0ea5e9',
       background: 'rgba(255, 255, 255, 0.1)',
     },
     '&.ant-menu-item-selected': {
-      color: colorPrimary,
-      background: 'rgba(255, 255, 255, 0.1)',
+      color: '#ffffff',
+      background: 'linear-gradient(90deg, #0ea5e9, #0284c7)',
     },
   };
 
@@ -153,9 +153,10 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
           background: 'transparent',
           WebkitBackgroundClip: 'text',
           backgroundClip: 'text',
-          color: colorPrimary, 
+          color: '#0ea5e9',
+          textShadow: '0 0 10px rgba(14, 165, 233, 0.6)',
         }}>
-         智慧论文检索
+         AI病理研究
         </span>
       </div>
       
@@ -166,43 +167,70 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
         onClick={handleMenuClick}
         items={menuItems}
         style={menuStyle}
-        itemStyle={menuItemStyle}
       />
       
       {/* 右侧功能区 */}
-      <Space size="middle" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+      <Space size="middle" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
        
         
        
-        {/* 用户区域 */}
+        {/* 用户区域 - 增强医疗主题风格 */}
         <Dropdown 
           menu={{ items: userMenuItems }}
           placement="bottomRight"
         >
-          <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <Avatar icon={<UserOutlined />} style={{ backgroundColor: colorPrimary }} />
-            <span style={{ marginLeft: 8 }}>用户</span>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            padding: '5px 10px',
+            borderRadius: '6px',
+            '&:hover': {
+              background: 'rgba(255, 255, 255, 0.1)',
+            }
+          }}>
+            <Avatar 
+              icon={<UserOutlined />} 
+              style={{ 
+                backgroundColor: '#0ea5e9'
+              }} 
+            />
+            <span style={{ marginLeft: 8, color: '#ffffff', fontWeight: 500 }}>用户</span>
           </div>
         </Dropdown>
         
         {/* 登录/注册按钮 */}
-        <Link to="/pages/Login">
+        <Link to="/enter">
           <Button 
             type="text" 
             icon={<LoginOutlined />}
-            style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+            style={{ 
+              color: '#ffffff',
+              fontSize: '14px',
+              fontWeight: 500,
+              '&:hover': {
+                color: '#0ea5e9',
+                background: 'rgba(14, 165, 233, 0.1)',
+              }
+            }}
           >
             登录
           </Button>
         </Link>
         
-        <Link to="/pages/Register">
+        <Link to="/register">
           <Button 
             type="primary" 
             icon={<UserAddOutlined />}
             style={{ 
-              background: `linear-gradient(90deg, ${colorPrimary}, #60a5fa)`,
-              border: 'none'
+              background: 'linear-gradient(90deg, #0ea5e9, #0284c7)',
+              border: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              '&:hover': {
+                background: 'linear-gradient(90deg, #0284c7, #0c4a6e)',
+              },
+              transition: 'all 0.3s ease'
             }}
           >
             注册
