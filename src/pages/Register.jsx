@@ -6,8 +6,11 @@ import {
   LockOutlined, 
   SendOutlined,
   InfoCircleOutlined,
-  WechatOutlined
+  WechatOutlined,
+  MailOutlined,
+  UserOutlined
 } from '@ant-design/icons';
+import axiosInstance from '../utils/axiosInstance';
 
 const Register = () => {
   const [form] = Form.useForm();
@@ -164,13 +167,46 @@ const Register = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 模拟注册请求
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      message.success('注册成功！');
-      // 注册成功后跳转到首页
-      navigate('/');
+      // 调用后端注册API
+      const response = await axiosInstance.post('/api/register', {
+        username: values.username,
+        password: values.password,
+        email: values.email,
+        full_name: values.username
+      });
+      
+      console.log('注册成功响应:', response.data);
+      
+      // 注册成功后立即登录
+      const loginResponse = await axiosInstance.post('/api/login', {
+        username: values.username,
+        password: values.password
+      });
+      
+      console.log('登录成功响应:', loginResponse.data);
+      
+      // 存储登录信息 - 注意后端返回的是token而不是access_token
+      localStorage.setItem('token', loginResponse.data.token);
+      localStorage.setItem('userInfo', JSON.stringify({
+        user_id: response.data.id,
+        username: response.data.username
+      }));
+      
+      message.success('注册成功！正在进入系统...');
+      
+      // 延迟一小段时间确保消息显示后再跳转
+      setTimeout(() => {
+        navigate('/AIchat');
+      }, 1000);
     } catch (error) {
-      message.error('注册失败，请稍后重试');
+      if (error.response) {
+        message.error(error.response.data.detail || '注册失败，请稍后重试');
+      } else if (error.request) {
+        message.error('网络连接失败，请检查您的网络');
+      } else {
+        message.error('注册失败，请稍后重试');
+      }
+      console.error('注册错误:', error);
     } finally {
       setLoading(false);
     }
@@ -417,27 +453,35 @@ const Register = () => {
           >
             {/* 手机号输入 */}
             <Form.Item
-              name="phone"
+              name="username"
               label={
                 <span style={{
                   color: '#334155',
                   fontWeight: 500,
                   fontSize: '14px'
                 }}>
-                  手机号
+                  用户名
                 </span>
               }
               rules={[
                 {
                   required: true,
-                  message: '请输入手机号',
-                  pattern: /^1[3-9]\d{9}$/
+                  message: '请输入用户名'
+                },
+                {
+                  min: 3,
+                  max: 20,
+                  message: '用户名长度应在3-20个字符之间'
+                },
+                {
+                  pattern: /^[a-zA-Z0-9_]+$/,
+                  message: '用户名只能包含字母、数字和下划线'
                 }
               ]}
             >
               <Input
-                prefix={<PhoneOutlined style={{ color: primaryColor }} />}
-                placeholder="请输入手机号"
+                prefix={<UserOutlined style={{ color: primaryColor }} />}
+                placeholder="请输入用户名"
                 style={{
                   height: '44px',
                   borderRadius: '8px',
@@ -450,64 +494,41 @@ const Register = () => {
                 }}
               />
             </Form.Item>
-
-            {/* 验证码输入 */}
+            
+            {/* 邮箱输入 */}
             <Form.Item
-              name="verificationCode"
+              name="email"
               label={
                 <span style={{
                   color: '#334155',
                   fontWeight: 500,
                   fontSize: '14px'
                 }}>
-                  验证码
+                  邮箱
                 </span>
               }
               rules={[
                 {
                   required: true,
-                  message: '请输入验证码',
-                  pattern: /^\d{6}$/
+                  message: '请输入邮箱',
+                  type: 'email'
                 }
               ]}
             >
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <Input
-                  prefix={<LockOutlined style={{ color: primaryColor }} />}
-                  placeholder="请输入验证码"
-                  style={{
-                    flex: 1,
-                    height: '44px',
-                    borderRadius: '8px',
-                    borderColor: '#cbd5e1',
-                    fontSize: '15px',
-                    '&:focus': {
-                      borderColor: primaryColor,
-                      boxShadow: `0 0 0 2px rgba(14, 165, 233, 0.2)`
-                    }
-                  }}
-                />
-                <Button
-                  type="primary"
-                  onClick={handleGetCode}
-                  disabled={countdown > 0}
-                  style={{
-                    width: '120px',
-                    height: '44px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    background: countdown > 0 ? '#94a3b8' : `linear-gradient(90deg, ${primaryColor}, #0284c7)`,
-                    border: 'none',
-                    boxShadow: countdown > 0 ? 'none' : `0 4px 12px rgba(14, 165, 233, 0.4)`,
-                    '&:hover': {
-                      background: countdown > 0 ? '#94a3b8' : `linear-gradient(90deg, #0284c7, #0c4a6e)`
-                    }
-                  }}
-                >
-                  {countdown > 0 ? `${countdown}s后重试` : '获取验证码'}
-                </Button>
-              </div>
+              <Input
+                prefix={<MailOutlined style={{ color: primaryColor }} />}
+                placeholder="请输入邮箱"
+                style={{
+                  height: '44px',
+                  borderRadius: '8px',
+                  borderColor: '#cbd5e1',
+                  fontSize: '15px',
+                  '&:focus': {
+                    borderColor: primaryColor,
+                    boxShadow: `0 0 0 2px rgba(14, 165, 233, 0.2)`
+                  }
+                }}
+              />
             </Form.Item>
 
             {/* 密码输入 */}
@@ -525,8 +546,12 @@ const Register = () => {
               rules={[
                 {
                   required: true,
-                  message: '请设置密码',
-                  min: 6
+                  message: '请设置密码'
+                },
+                {
+                  min: 6,
+                  max: 20,
+                  message: '密码长度应在6-20个字符之间'
                 }
               ]}
             >
@@ -559,7 +584,7 @@ const Register = () => {
             >
               <Checkbox style={{
                 color: '#64748b',
-                '& .ant-checkbox-inner': {
+                '& .antCheckboxInner': {
                   borderRadius: '4px',
                   '&:checked': {
                     backgroundColor: primaryColor,

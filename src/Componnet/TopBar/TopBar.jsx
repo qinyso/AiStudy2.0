@@ -49,6 +49,12 @@ const { Header } = Layout;
     path:'/AIchat',
     icon: <TrophyOutlined />,
   },
+  {
+    key:'3',
+    label:'文件上传',
+    path:'/upload',
+    icon: <FileTextOutlined />,
+  },
  
 
 ];
@@ -93,10 +99,9 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
     padding: '0 24px',
-    height: 54,
-    zIndex: 1,
+    height: 54,        
+    zIndex: 1000, // 提高z-index值确保导航栏始终在顶部
     position: 'sticky',
     top: 0,
   };
@@ -122,10 +127,13 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     },
   };
   
-  // 菜单样式
+  // 菜单样式 - 确保完整显示菜单项并居中
   const menuStyle = {
     background: 'transparent',
     border: 'none',
+    flex: 1, // 让菜单占满可用空间
+    minWidth: 0, // 允许菜单缩小
+    justifyContent: 'center', // 菜单居中显示
   };
   
   // 简化的菜单项样式 - 与首页融为一体
@@ -167,6 +175,8 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
         onClick={handleMenuClick}
         items={menuItems}
         style={menuStyle}
+        overflowedIndicator={null} 
+        ellipsis="false"
       />
       
       {/* 右侧功能区 */}

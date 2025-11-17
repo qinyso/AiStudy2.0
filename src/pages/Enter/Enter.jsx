@@ -4,12 +4,10 @@ import { Form, Input, Button, Checkbox, message } from 'antd';
 import { 
   UserOutlined, 
   LockOutlined, 
-  EyeOutlined, 
-  EyeInvisibleOutlined,
   MailOutlined,
   PhoneOutlined
 } from '@ant-design/icons';
-import { themeColors } from '../../theme';
+import axiosInstance from '../../utils/axiosInstance';
 
 const Enter = () => {
   const [form] = Form.useForm();
@@ -155,12 +153,40 @@ const Enter = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 模拟登录请求
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      message.success('登录成功！');
-      navigate('/');
+      const response = await axiosInstance.post('/api/login', {
+        username: values.username,
+        password: values.password,
+      });
+      
+      console.log('登录成功响应:', response.data);
+      
+      // 存储登录信息 - 更正字段名以匹配后端返回的数据结构
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userInfo',
+        JSON.stringify(
+          {
+            user_id: response.data.user_info?.id,
+            username: response.data.user_info?.username || values.username,
+          }
+        )
+      );
+      
+      message.success('登录成功！正在进入系统...');
+      
+      // 添加短暂延迟确保消息显示后再跳转
+      setTimeout(() => {
+        navigate('/AIchat');
+      }, 1000);
+
     } catch (error) {
-      message.error('登录失败，请检查账号密码');
+      if (error.response) {
+        message.error(error.response.data.detail || '登录失败，请检查账号密码');
+      } else if (error.request) {
+        message.error('网络连接失败，请检查您的网络');
+      } else {
+        message.error('登录失败，请稍后重试');
+      }
+      console.error('登录错误:', error);
     } finally {
       setLoading(false);
     }
@@ -349,7 +375,7 @@ const Enter = () => {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox style={{
                 color: '#64748b',
-                '& .ant-checkbox-inner': {
+                '& ': {
                   borderRadius: '4px',
                   '&:checked': {
                     backgroundColor: primaryColor,
