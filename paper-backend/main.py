@@ -10,25 +10,6 @@ import os
 import json
 import logging
 from pathlib import Path
-import numpy as np
-import io
-import base64
-from PIL import Image
-import cv2
-# 导入cellpose相关库
-import numpy as np
-import io
-import base64
-from PIL import Image
-import cv2
-# 动态导入cellpose以避免版本问题
-import importlib
-cellpose = importlib.import_module('cellpose')
-try:
-    from cellpose.io import imread
-except ImportError:
-    # 如果无法导入imread，继续运行
-    pass
 
 # ------------------------------
 # 初始化配置（新增文件上传配置）
@@ -74,31 +55,6 @@ UPLOAD_FOLDER = './upload_files'  # 文件保存目录
 MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100MB 上传限制
 # 创建上传目录（不存在则自动创建）
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
-
-# 初始化cellpose模型
-print("正在加载Cellpose模型...")
-try:
-    # 尝试直接导入Cellpose模型
-    from cellpose.models import Cellpose
-    cellpose_model = Cellpose(model_type='nuclei', gpu=False)
-except ImportError:
-    try:
-        # 尝试另一种导入方式
-        models = importlib.import_module('cellpose.models')
-        cellpose_model = models.Cellpose(model_type='nuclei', gpu=False)
-    except Exception as e:
-        print(f"加载Cellpose模型时出错: {e}")
-        print("将使用简化模式继续运行...")
-        # 如果无法加载模型，创建一个模拟对象
-        class MockCellposeModel:
-            def eval(self, img):
-                return np.zeros_like(img), np.zeros_like(img), np.ones((1, 2))
-        cellpose_model = MockCellposeModel()
-print("Cellpose模型初始化完成")
-
-# 创建cellpose处理结果保存目录
-CELLPOSE_FOLDER = './cellpose_results'
-Path(CELLPOSE_FOLDER).mkdir(exist_ok=True)
 
 # ------------------------------
 # 算法推理相关配置（保留不变）
@@ -533,92 +489,6 @@ async def upload_multiple_files(
         "msg": "批量上传完成",
         "data": {"results": upload_results}
     }
-
-# ------------------------------
-# 新增：细胞分割与计数接口
-# ------------------------------
-class SegmentationResponse(BaseModel):
-    cellCount: int
-    originalImage: str
-    outlinedImage: str
-    maskImage: str
-
-@app.post("/api/segment", response_model=SegmentationResponse)
-async def segment_cells(
-    file: UploadFile = File(...),
-    current_user: UserInDB = Depends(get_current_user)
-):
-    """使用Cellpose进行细胞分割与计数"""
-    try:
-        # 读取图像文件
-        contents = await file.read()
-        image = np.array(Image.open(io.BytesIO(contents)).convert('RGB'))
-        
-        # 使用cellpose模型进行分割
-        masks, flows, styles, diams = cellpose_model.eval(
-            image, 
-            diameter=None, 
-            channels=[0, 0]  # 灰度图像模式
-        )
-        
-        # 计算细胞数量（减去背景0）
-        cell_count = len(np.unique(masks)) - 1
-        
-        # 生成三种图像结果
-        # 1. 原始图像
-        original_image_pil = Image.fromarray(image)
-        
-        # 2. 轮廓图像（在原始图像上叠加分割轮廓）
-        outlined_image = image.copy()
-        for i in range(1, cell_count + 1):
-            mask = (masks == i).astype(np.uint8)
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            cv2.drawContours(outlined_image, contours, -1, (255, 0, 0), 2)
-        outlined_image_pil = Image.fromarray(outlined_image)
-        
-        # 3. 掩码图像（使用不同颜色标记不同细胞）
-        color_mask = np.zeros((masks.shape[0], masks.shape[1], 3), dtype=np.uint8)
-        for i in range(1, cell_count + 1):
-            # 为每个细胞生成不同的颜色
-            color = np.random.randint(0, 255, 3)
-            color_mask[masks == i] = color
-        mask_image_pil = Image.fromarray(color_mask)
-        
-        # 将图像保存到本地
-        file_id = os.path.splitext(file.filename)[0]
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        save_id = f"{file_id}_{timestamp}"
-        
-        original_path = os.path.join(CELLPOSE_FOLDER, f'{save_id}_original.png')
-        outlined_path = os.path.join(CELLPOSE_FOLDER, f'{save_id}_outlined.png')
-        mask_path = os.path.join(CELLPOSE_FOLDER, f'{save_id}_mask.png')
-        
-        original_image_pil.save(original_path)
-        outlined_image_pil.save(outlined_path)
-        mask_image_pil.save(mask_path)
-        
-        # 转换为base64以返回给前端
-        def image_to_base64(img_pil):
-            buffered = io.BytesIO()
-            img_pil.save(buffered, format="PNG")
-            return base64.b64encode(buffered.getvalue()).decode('utf-8')
-        
-        original_base64 = image_to_base64(original_image_pil)
-        outlined_base64 = image_to_base64(outlined_image_pil)
-        mask_base64 = image_to_base64(mask_image_pil)
-        
-        logger.info(f"用户 {current_user.username} 完成细胞分割，文件名: {file.filename}，检测到 {cell_count} 个细胞")
-        
-        return SegmentationResponse(
-            cellCount=cell_count,
-            originalImage=f'data:image/png;base64,{original_base64}',
-            outlinedImage=f'data:image/png;base64,{outlined_base64}',
-            maskImage=f'data:image/png;base64,{mask_base64}'
-        )
-        
-    except Exception as e:
-        logger.error(f"细胞分割失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

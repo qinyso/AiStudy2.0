@@ -64,7 +64,7 @@ const { Header } = Layout;
   },
   {
     key:'5',
-    label:'WSI分割与计数',
+    label:'细胞分割与计数',
     path:'/divide',
     icon: <FileImageOutlined />,
   },

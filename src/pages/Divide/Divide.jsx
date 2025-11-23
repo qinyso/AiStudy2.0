@@ -1,7 +1,7 @@
 import './Divide.css';
 import React, { useState } from 'react';
 import { InboxOutlined, FileTextOutlined, FolderOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { message, Upload, Button, Modal, Spin, Typography, Card } from 'antd';
+import { message, Upload, Button, Modal, Spin, Typography, Card, Progress } from 'antd';
 const { Dragger } = Upload;
 const { Title, Paragraph, Text } = Typography;
 import { themeColors } from '../../theme';
@@ -11,56 +11,22 @@ const getToken = () => {
   return localStorage.getItem('token');
 };
 
-// 实际调用cellpose API的函数
+// 模拟cellpose处理函数 - 实际项目中应该通过API调用后端服务
 const processImageWithCellpose = async (file, setProcessingProgress) => {
-  // 创建FormData对象
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  // 创建XMLHttpRequest以支持进度监控
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    
-    // 监控进度
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable && setProcessingProgress) {
-        const progress = Math.round((event.loaded / event.total) * 30); // 上传进度占30%
-        setProcessingProgress(progress);
-      }
-    });
-    
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            resolve(response);
-          } catch (error) {
-            reject(new Error('解析响应失败'));
-          }
-        } else {
-          try {
-            const error = JSON.parse(xhr.responseText);
-            reject(new Error(error.error || '处理失败'));
-          } catch {
-            reject(new Error('请求失败'));
-          }
-        }
-      }
-    };
-    
-    xhr.open('POST', 'http://localhost:8000/api/segment', true);
-    xhr.send(formData);
-    
-    // 模拟处理进度（后端处理部分占70%）
-    const simulateProgress = async () => {
-      for (let i = 30; i < 100; i += 5) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        if (setProcessingProgress) setProcessingProgress(i);
-      }
-    };
-    simulateProgress();
-  });
+  // 模拟处理进度
+  for (let i = 0; i <= 100; i += 10) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    if (setProcessingProgress) setProcessingProgress(i);
+  }
+
+  // 模拟返回结果 - 实际项目中应替换为真实API调用
+  return {
+    originalImage: URL.createObjectURL(file),
+    outlinedImage: URL.createObjectURL(file), // 实际应该是处理后的图像
+    maskImage: URL.createObjectURL(file),      // 实际应该是处理后的图像
+    cellCount: 158, // 模拟细胞数量
+    // 在实际应用中，这里会返回后端处理生成的图像URL
+  };
 };
 
 // 处理文件选择
