@@ -1,69 +1,62 @@
-# React + TypeScript + Vite
+# AI肾病智能研究
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+本项目是一个基于人工智能技术的肾病研究平台，致力于提供高效、准确的肾病数据分析和诊断支持。
 
-Currently, two official plugins are available:
+## 项目介绍
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+AI肾病智能研究平台结合了最新的深度学习技术和医学专业知识，为医学研究人员和临床医生提供：
 
-## Expanding the ESLint configuration
+- 肾病图像智能分析
+- 病理数据处理和预测
+- 研究结果可视化展示
+- 文献资料智能检索
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 技术栈
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 前端：React + JavaScript
+- 后端：Python FastAPI
+- 数据库：SQLite
+- AI模型：细胞分割和图像识别技术
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## 安装与运行
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 前端
+
+```bash
+# 安装依赖
+pnpm install
+
+# 开发模式运行
+pnpm run dev
+
+# 构建生产版本
+pnpm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 后端
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# 进入后端目录
+cd paper-backend
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 安装依赖
+pip install -r requirements.txt
+
+# 运行后端服务
+python main.py
 ```
+
+## 功能模块
+
+- 图像上传与分析：支持医学图像的上传和智能分析
+- 研究数据管理：组织和管理肾病研究相关数据
+- 结果展示与导出：可视化呈现分析结果并支持导出
+- 用户权限管理：确保数据安全和访问控制
+
+## 贡献指南
+
+欢迎医学专业人员和开发者共同参与本项目的开发和改进。
+
+## 许可证
+
+本项目仅供学术研究使用。

@@ -8,7 +8,7 @@ import m2 from '../assets/m2.jpeg';
 import m3 from '../assets/m3.jpeg';
 import m4 from '../assets/m4.jpeg';
 
-// 导航菜单项 - AI病理研究相关
+// 导航菜单项 - AI肾病智能研究相关
 const navItems = ['研究概述', '病理分析', '诊断案例', '技术支持', '关于我们'];
 
 // 3D立方体组件 - 改为医疗蓝色调
@@ -188,7 +188,7 @@ const PathologyDevice = ({ size = 100, x = 0, y = 0 }) => {
         textShadow: '0 0 10px rgba(14, 165, 233, 0.8)',
         textAlign: 'center'
       }}>
-        AI病理<br/>分析系统
+        AI肾病<br/>分析系统
       </div>
     </div>
   );
@@ -203,10 +203,10 @@ const ImageCarousel = () => {
   
   // 轮播图片数据
   const images = [
-    { src: m1, alt: '病理研究图片1', caption: '高精度病理切片分析', subtitle: 'AI驱动的细胞级精准识别' },
-    { src: m2, alt: '病理研究图片2', caption: 'AI辅助诊断技术', subtitle: '深度学习提升诊断准确率' },
-    { src: m3, alt: '病理研究图片3', caption: '医学影像智能识别', subtitle: '多模态融合分析系统' },
-    { src: m4, alt: '病理研究图片4', caption: '数字化病理平台', subtitle: '云端协作与数据分析' }
+    { src: m1, alt: '肾病研究图片1', caption: '高精度肾脏切片分析', subtitle: 'AI驱动的细胞级精准识别' },
+    { src: m2, alt: '肾病研究图片2', caption: 'AI辅助肾病诊断', subtitle: '深度学习提升诊断准确率' },
+    { src: m3, alt: '肾病研究图片3', caption: '肾脏医学影像智能识别', subtitle: '多模态融合分析系统' },
+    { src: m4, alt: '肾病研究图片4', caption: '数字化肾病研究平台', subtitle: '云端协作与数据分析' }
   ];
 
   // 自动轮播
@@ -768,7 +768,7 @@ const Home = () => {
             letterSpacing: '1px',
             textTransform: 'uppercase'
           }}>
-            AI病理研究平台
+            AI肾病智能研究
           </h1>
           <p style={{
             fontSize: '1.1rem',
@@ -777,7 +777,7 @@ const Home = () => {
             margin: '0 auto',
             lineHeight: 1.6
           }}>
-            融合人工智能与病理学，开启精准诊断新时代
+            融合人工智能与肾病学，开启精准诊断与研究新时代
           </p>
         </div>
 
@@ -802,15 +802,15 @@ const Home = () => {
               color: '#ffffff',
               opacity: 0.9
             }}>
-              精准病理分析解决方案
+              精准肾病分析解决方案
             </h2>
             <p style={{
               fontSize: '1rem',
               color: 'rgba(255, 255, 255, 0.6)',
               lineHeight: 1.7
             }}>
-              我们的系统融合了深度学习和医学影像分析技术，为病理学家提供高效、精准的辅助诊断工具。
-              通过AI算法快速识别病变特征，提高诊断准确率，缩短诊断时间，助力精准医疗。
+              我们的系统融合了深度学习和医学影像分析技术，为肾病研究人员提供高效、精准的辅助分析工具。
+              通过AI算法快速识别肾脏病变特征，提高分析准确率，缩短研究时间，助力肾病精准医疗。
             </p>
           </div>
 
@@ -858,11 +858,11 @@ const Home = () => {
           borderTop: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           <p style={{
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '0.9rem'
-          }}>
-            © 2025 AI病理研究平台 | 精准·智能·创新
-          </p>
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '0.9rem'
+            }}>
+              © 2025 AI肾病智能研究 | 精准·智能·创新
+            </p>
         </div>
       </div>
 

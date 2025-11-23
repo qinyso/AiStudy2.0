@@ -1,7 +1,7 @@
 import './Upload.css';
 import React, { useState } from 'react';
-import { InboxOutlined, FileTextOutlined } from '@ant-design/icons';
-import { message, Upload } from 'antd';
+import { InboxOutlined, FileTextOutlined, FolderOutlined, LoadingOutlined } from '@ant-design/icons';
+import { message, Upload, Button, Modal } from 'antd';
 const { Dragger } = Upload;
 import { Card } from 'antd';
 import { themeColors } from '../../theme';
@@ -10,68 +10,127 @@ const getToken = () => {
   return localStorage.getItem('token');
 };
 
-const props = {
-  name: 'files', // 修改为'files'以匹配后端接口期望的字段名
-  multiple: true,
-  action: 'http://localhost:8000/api/upload-multiple', // 使用后端多文件上传接口
-
+// 自定义上传函数 - 使用BiomedCoOp API
+const customUpload = async (files, setIsProcessing) => {
+  // 使用相对路径，通过Vite代理处理CORS问题
+  const token = getToken();
   
-  onChange(info) {
-    const { status, response, error } = info.file;
-    console.log('Upload status:', status);
-    console.log('Response:', response);
-    console.log('File list:', info.fileList);
+  if (!token) {
+    message.error('请先登录再上传文件');
+    return { success: false, message: '未登录' };
+  }
+  
+  try {
+    message.loading('开始上传文件...', 0);
     
-    if (status !== 'uploading') {
-      console.log('Current file:', info.file);
+    // Step 1: 上传图片到服务器
+    const uploadFormData = new FormData();
+    files.forEach(file => {
+      uploadFormData.append('files', file);
+    });
+    // 添加文件夹名称参数
+    uploadFormData.append('folder_name', 'temp');
+    
+    const uploadResponse = await fetch('/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: uploadFormData
+    });
+    
+    if (!uploadResponse.ok) {
+      throw new Error(`文件上传失败: ${uploadResponse.status}`);
     }
-    if (status === 'done') {
-      if (response && response.code === 200) {
-        message.success(`${info.file.name} 文件上传成功。`);
-        
-        // 检查所有文件是否都已上传完成
-        const allDone = info.fileList.every(file => file.status === 'done');
-        console.log('All files done?', allDone);
-        
-        if (allDone) {
-          // 调用分类结果更新函数，传入后端响应和上传的文件列表
-          console.log('Calling handleResultsUpdate with:', response, info.fileList);
-          handleResultsUpdate(response, info.fileList);
-          message.success('所有文件上传完成，分析结果已生成');
-        }
-      } else {
-        // 处理各种错误情况
-        let errorMsg = `${info.file.name} 文件上传失败。`;
-        if (error && error.response) {
-          if (error.response.status === 401) {
-            errorMsg = '请先登录再上传文件';
-          } else if (error.response.status === 422) {
-            errorMsg = '上传参数错误，请检查文件格式';
-          }
-        }
-        message.error(errorMsg);
+    
+    const uploadResult = await uploadResponse.json();
+    message.destroy();
+    
+    // 显示上传成功提示
+    alert(`文件上传成功！共 ${files.length} 个文件`);
+    
+    // 显示加载动画 - 更新状态
+    if (setIsProcessing) setIsProcessing(true);
+    message.loading('正在执行模型推理...', 0);
+    
+    // Step 2: 执行模型推理
+    const predictResponse = await fetch('/predict', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    } else if (status === 'error') {
-        // 处理各种错误情况
-        let errorMsg = `${info.file.name} 文件上传失败。`;
-        if (error && error.response) {
-          if (error.response.status === 401) {
-            errorMsg = '请先登录再上传文件';
-          } else if (error.response.status === 422) {
-            // 提供更详细的422错误信息
-            errorMsg = `${info.file.name} 上传参数错误。请检查：1) 文件格式是否支持 2) 文件大小是否超过限制 3) 是否已登录`;
-            console.log('422错误详情:', error.response.data);
-          } else if (error.response.data && error.response.data.msg) {
-            errorMsg = `${info.file.name} 上传失败: ${error.response.data.msg}`;
-          }
-        }
-        message.error(errorMsg);
-      }
-    },
-    // 禁用默认的Content-Type设置，让浏览器自动处理multipart/form-data
-    withCredentials: false,
-    onDrop(e) {
+    });
+    
+    if (!predictResponse.ok) {
+      throw new Error(`推理失败: ${predictResponse.status}`);
+    }
+    
+    const predictResult = await predictResponse.json();
+    message.destroy();
+    
+    return { 
+      success: true, 
+      data: {
+        upload: uploadResult,
+        prediction: predictResult
+      } 
+    };
+  } catch (error) {
+    message.destroy();
+    console.error('处理错误:', error);
+    return { success: false, message: error.message };
+  } finally {
+    // 无论成功失败，都隐藏加载动画
+    if (setIsProcessing) setIsProcessing(false);
+  }
+};
+
+// 处理文件选择
+const handleFileSelect = async (files, handleResultsUpdate, setIsProcessing) => {
+  if (!files || files.length === 0) return;
+  
+  // 过滤出图片文件
+  const imageFiles = Array.from(files).filter(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext);
+  });
+  
+  if (imageFiles.length === 0) {
+    message.error('请选择有效的图片文件');
+    return;
+  }
+  
+  message.loading(`正在上传 ${imageFiles.length} 个文件...`, 0);
+  
+  try {
+    const uploadResult = await customUpload(imageFiles, setIsProcessing);
+    
+    if (uploadResult.success) {
+      message.destroy();
+      message.success(`文件上传成功！共 ${imageFiles.length} 个文件`);
+      // 更新分析结果
+      handleResultsUpdate(uploadResult.data, imageFiles);
+    } else {
+      message.destroy();
+      message.error(`上传失败: ${uploadResult.message}`);
+    }
+  } catch (error) {
+    message.destroy();
+    message.error(`上传过程中发生错误: ${error.message}`);
+    if (setIsProcessing) setIsProcessing(false);
+  }
+};
+
+const props = {
+  beforeUpload: () => false, // 禁用默认上传逻辑
+  showUploadList: false, // 隐藏上传列表
+  multiple: true,
+  // 禁用默认的Content-Type设置，让浏览器自动处理multipart/form-data
+  withCredentials: false,
+  onDrop(e) {
+    // 处理拖放上传（支持文件和文件夹）
     console.log('Dropped files', e.dataTransfer.files);
+    // 这里不直接处理拖放，而是在下面的自定义点击逻辑中处理
   },
 };
 const UploadComponent = () =>{
@@ -86,20 +145,139 @@ const UploadComponent = () =>{
       uploadedFiles: []
     });
     
-    // 处理分类结果更新
+    // 上传方式选择弹窗状态
+    const [uploadModalVisible, setUploadModalVisible] = useState(false);
+    
+    // 处理状态 - 控制加载动画
+    const [isProcessing, setIsProcessing] = useState(false);
+    
+    // 处理分类结果更新 - 使用BiomedCoOp API返回的真实推理结果
     const handleResultsUpdate = (results, files) => {
-      // 这里我们从后端返回的数据中提取分类结果
-      // 由于后端接口目前只返回上传结果，我们模拟一些分类数据
-      // 在实际应用中，这里应该从后端返回的分类结果中提取真实数据
+      // 检查是否有推理结果
+      if (!results || !results.prediction) {
+        message.error('未收到有效的推理结果');
+        return;
+      }
+      
+      const predictions = results.prediction.predictions || [];
+      console.log('BiomedCoOp 推理结果:', predictions);
+      
+      // 统计各类别的数量
+      const categoryStats = {
+        no_tumor: 0,
+        meningioma_tumor: 0,
+        glioma_tumor: 0,
+        pituitary_tumor: 0,
+        other: 0
+      };
+      
+      predictions.forEach(pred => {
+        if (categoryStats.hasOwnProperty(pred.category)) {
+          categoryStats[pred.category]++;
+        } else {
+          categoryStats.other++;
+        }
+      });
+      
+      // 计算百分比
+      const totalPredictions = predictions.length;
+      const normalPercent = totalPredictions > 0 ? Math.round((categoryStats.no_tumor / totalPredictions) * 100) : 100;
+      const abnormalPercent = 100 - normalPercent;
+      
+      // 生成描述文本
+      let normalDescription = '';
+      let abnormalDescription = '';
+      let recommendation = '';
+      
+      if (normalPercent === 100) {
+        normalDescription = '所有图像均显示正常，未检测到肿瘤迹象。';
+        recommendation = '建议定期进行健康检查，保持健康的生活方式。如有不适，请及时就医。';
+      } else if (normalPercent > 0) {
+        const normalCount = categoryStats.no_tumor;
+        normalDescription = `部分图像显示正常 (${normalCount}张)，未检测到肿瘤迹象。`;
+        
+        // 生成异常类型描述
+        const abnormalTypes = [];
+        if (categoryStats.meningioma_tumor > 0) abnormalTypes.push(`脑膜瘤 (${categoryStats.meningioma_tumor}处)`);
+        if (categoryStats.glioma_tumor > 0) abnormalTypes.push(`胶质瘤 (${categoryStats.glioma_tumor}处)`);
+        if (categoryStats.pituitary_tumor > 0) abnormalTypes.push(`垂体瘤 (${categoryStats.pituitary_tumor}处)`);
+        if (categoryStats.other > 0) abnormalTypes.push(`其他异常 (${categoryStats.other}处)`);
+        
+        abnormalDescription = `检测到异常区域，包括: ${abnormalTypes.join('、')}。`;
+        recommendation = '建议进行进一步的医学检查和专业诊断。请咨询神经科医生获取详细的治疗建议。';
+        
+        if (abnormalPercent > 50) {
+          recommendation = '异常区域比例较高，建议立即就医，进行进一步的影像学检查和病理活检。';
+        }
+      } else { // normalPercent === 0
+        normalDescription = '所有图像均显示异常。';
+        
+        // 生成异常类型描述
+        const abnormalTypes = [];
+        if (categoryStats.meningioma_tumor > 0) abnormalTypes.push(`脑膜瘤 (${categoryStats.meningioma_tumor}处)`);
+        if (categoryStats.glioma_tumor > 0) abnormalTypes.push(`胶质瘤 (${categoryStats.glioma_tumor}处)`);
+        if (categoryStats.pituitary_tumor > 0) abnormalTypes.push(`垂体瘤 (${categoryStats.pituitary_tumor}处)`);
+        if (categoryStats.other > 0) abnormalTypes.push(`其他异常 (${categoryStats.other}处)`);
+        
+        abnormalDescription = `检测到异常区域，包括: ${abnormalTypes.join('、')}。`;
+        recommendation = '未检测到正常组织，建议立即就医，进行全面的医学检查和专业诊断。';
+      }
+      
+      // 更新状态
       setAnalysisResults({
         uploaded: true,
-        normalPercent: Math.floor(Math.random() * 30) + 70, // 模拟70-99%的正常组织
-        abnormalPercent: Math.floor(Math.random() * 30), // 模拟0-29%的异常组织
-        normalDescription: '大部分区域显示正常细胞结构，细胞排列规则，未见明显异型性',
-        abnormalDescription: '在部分区域观察到少量细胞形态异常，细胞大小不均，建议进一步检查',
-        recommendation: '建议进行常规随访观察。如有临床症状变化，请及时就医进行病理活检确诊。',
-        uploadedFiles: files
+        normalPercent: normalPercent,
+        abnormalPercent: abnormalPercent,
+        normalDescription: normalDescription,
+        abnormalDescription: abnormalDescription,
+        recommendation: recommendation,
+        uploadedFiles: files,
+        predictions: predictions,
+        totalSamples: results.prediction.total_samples_processed_to_date,
+        processingTime: results.prediction.message
       });
+    };
+    
+    // 打开上传方式选择弹窗
+    const openUploadModal = () => {
+      setUploadModalVisible(true);
+    };
+    
+    // 关闭上传方式选择弹窗
+    const closeUploadModal = () => {
+      setUploadModalVisible(false);
+    };
+    
+    // 处理普通文件上传
+    const handleFileUpload = () => {
+      if (isProcessing) return;
+      
+      closeUploadModal();
+      
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = '.jpg,.jpeg,.png,.gif,.bmp';
+      input.onchange = (e) => {
+        handleFileSelect(e.target.files, handleResultsUpdate, setIsProcessing);
+      };
+      input.click();
+    };
+    
+    // 处理文件夹上传
+    const handleFolderUpload = () => {
+      if (isProcessing) return;
+      
+      closeUploadModal();
+      
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.webkitdirectory = true; // 允许选择文件夹
+      input.multiple = true;
+      input.onchange = (e) => {
+        handleFileSelect(e.target.files, handleResultsUpdate, setIsProcessing);
+      };
+      input.click();
     };
     
     // 上传组件样式
@@ -122,7 +300,7 @@ const UploadComponent = () =>{
       width: '100%',
       maxWidth: 1600,
       gap: 20,
-      alignItems: 'flex-start',
+      alignItems: 'stretch', // 修改为stretch，使两个卡片高度相同
       justifyContent: 'center',
     };
     
@@ -130,6 +308,8 @@ const UploadComponent = () =>{
     const columnStyle = {
       width: '48%',
       maxWidth: 800,
+      display: 'flex',
+      flexDirection: 'column', // 确保内部元素也能占满高度
     };
 
     // 拖拽上传区域样式
@@ -138,6 +318,12 @@ const UploadComponent = () =>{
       borderRadius: 12,
       border: `2px dashed ${themeColors.colorBorder}`,
       background: 'rgba(15, 23, 42, 0.7)',
+      minHeight: '400px', // 设置与右侧卡片相同的最小高度
+      display: 'flex', // 添加flex布局
+      flexDirection: 'column', // 垂直排列内容
+      alignItems: 'center', // 水平居中
+      justifyContent: 'center', // 垂直居中
+      padding: '20px', // 添加内边距
       '&:hover': {
         borderColor: themeColors.colorPrimary,
         boxShadow: themeColors.boxShadow.medium,
@@ -151,7 +337,10 @@ const UploadComponent = () =>{
       border: `1px solid ${themeColors.colorBorder}`,
       background: 'rgba(15, 23, 42, 0.7)',
       boxShadow: themeColors.boxShadow.medium,
-      minHeight: '300px', // 确保最小高度，防止内容过少时显得不协调
+      minHeight: '400px', // 增加最小高度，使界面更加美观
+      display: 'flex',
+      flexDirection: 'column',
+      margin: 0, // 移除默认边距
     };
 
     // 标题样式
@@ -176,18 +365,75 @@ const UploadComponent = () =>{
           <div style={mainContentStyle}>
             {/* 左侧：上传区域 */}
             <div style={columnStyle}>
-              <Dragger {...props} style={draggerStyle}>
-                <p className="ant-upload-drag-icon" style={{ fontSize: '48px', color: themeColors.colorPrimary }}>
-                  <FileTextOutlined />
+              <Dragger {...props} style={draggerStyle} onClick={openUploadModal} disabled={isProcessing}>
+                <p className="ant-upload-drag-icon" style={{ fontSize: '48px', color: isProcessing ? themeColors.colorTextTertiary : themeColors.colorPrimary }}>
+                  {isProcessing ? <LoadingOutlined spin /> : <FileTextOutlined />}
                 </p>
                 <p className="ant-upload-text" style={{ color: themeColors.colorTextBase, fontSize: 18 }}>
-                  点击或拖拽文件到此区域上传
+                  {isProcessing ? '正在处理图片...' : '点击选择上传方式'}
                 </p>
                 <p className="ant-upload-hint" style={{ color: themeColors.colorTextTertiary }}>
-                  支持单个或批量上传病理图片。请确保图片质量清晰，便于AI准确分析。
+                  {isProcessing ? '正在分析图片，请稍候...' : '支持单个文件、多个文件或整个文件夹上传病理图片。'}
                 </p>
+                
+                {/* 快速上传提示 */}
+                <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <Button 
+                    type="primary" 
+                    icon={<FileTextOutlined />}
+                    onClick={(e) => { e.stopPropagation(); handleFileUpload(); }}
+                    style={{ maxWidth: '300px', alignSelf: 'center' }}
+                    disabled={isProcessing}
+                  >
+                    上传图片文件
+                  </Button>
+                  <Button 
+                    icon={<FolderOutlined />}
+                    onClick={(e) => { e.stopPropagation(); handleFolderUpload(); }}
+                    style={{ maxWidth: '300px', alignSelf: 'center' }}
+                    disabled={isProcessing}
+                  >
+                    上传文件夹
+                  </Button>
+                </div>
               </Dragger>
             </div>
+            
+            {/* 上传方式选择弹窗 */}
+            <Modal
+              title="选择上传方式"
+              open={uploadModalVisible}
+              onCancel={closeUploadModal}
+              footer={null}
+              width={400}
+            >
+              <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<FileTextOutlined />}
+                  onClick={handleFileUpload}
+                  style={{ width: '80%', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  上传图片文件
+                </Button>
+                <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto' }}>
+                  支持 .jpg, .jpeg, .png, .gif, .bmp 格式图片
+                </p>
+                
+                <Button 
+                  size="large"
+                  icon={<FolderOutlined />}
+                  onClick={handleFolderUpload}
+                  style={{ width: '80%', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  上传整个文件夹
+                </Button>
+                <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto' }}>
+                  自动识别文件夹中的所有图片文件
+                </p>
+              </div>
+            </Modal>
             
             {/* 右侧：分析结果卡片 */}
             <div style={columnStyle}>
@@ -209,15 +455,65 @@ const UploadComponent = () =>{
                 <>
                   <p style={{ color: themeColors.colorTextSecondary, marginBottom: 15, fontSize: 16 }}>AI辅助诊断系统已完成对您上传病理切片的分析，结果如下：</p>
                   
-                  {/* 显示上传的文件列表 */}
-                  {analysisResults.uploadedFiles.length > 0 && (
+                  {/* 显示处理统计信息 */}
+                  {analysisResults.processingTime && (
                     <div style={{ marginBottom: 20, padding: '10px', backgroundColor: 'rgba(15, 23, 42, 0.5)', borderRadius: 8 }}>
-                      <p style={{ color: themeColors.colorTextSecondary, marginBottom: 8, fontSize: 14 }}><strong>已分析文件：</strong></p>
-                      <ul style={{ margin: 0, paddingLeft: 20, color: themeColors.colorTextTertiary }}>
-                        {analysisResults.uploadedFiles.map((file, index) => (
-                          <li key={index} style={{ fontSize: 12, marginBottom: 4 }}>{file.name}</li>
-                        ))}
-                      </ul>
+                      <p style={{ color: themeColors.colorTextSecondary, marginBottom: 5, fontSize: 14 }}><strong>处理信息：</strong></p>
+                      <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: 0 }}>{analysisResults.processingTime}</p>
+                    </div>
+                  )}
+                  
+                  {/* 显示预测结果详情 */}
+                  {analysisResults.predictions && analysisResults.predictions.length > 0 && (
+                    <div style={{ marginBottom: 20, padding: '15px', backgroundColor: 'rgba(15, 23, 42, 0.5)', borderRadius: 8 }}>
+                      <p style={{ color: themeColors.colorTextSecondary, marginBottom: 10, fontSize: 14 }}><strong>预测结果详情：</strong></p>
+                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {analysisResults.predictions.map((prediction, index) => {
+                          // 获取对应的文件名
+                          const fileName = analysisResults.uploadedFiles[index] ? analysisResults.uploadedFiles[index].name : `Image ${index + 1}`;
+                          
+                          // 根据预测类别设置样式
+                          let categoryStyle = { color: themeColors.colorTextTertiary };
+                          let categoryText = prediction.category;
+                          
+                          // 创建英文名称到中文翻译的映射
+                          const categoryTranslations = {
+                            'no_tumor': '无肿瘤',
+                            'meningioma_tumor': '脑膜瘤',
+                            'glioma_tumor': '胶质瘤',
+                            'pituitary_tumor': '垂体瘤'
+                          };
+                           
+                          // 在英文名称后面添加中文翻译
+                          if (prediction.category === 'no_tumor') {
+                            categoryStyle = { color: themeColors.colorSuccess };
+                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
+                          } else if (prediction.category === 'meningioma_tumor') {
+                            categoryStyle = { color: themeColors.colorWarning };
+                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
+                          } else if (prediction.category === 'glioma_tumor') {
+                            categoryStyle = { color: themeColors.colorError };
+                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
+                          } else if (prediction.category === 'pituitary_tumor') {
+                            categoryStyle = { color: themeColors.colorPrimary };
+                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
+                          } else {
+                            // 对于未知类型，保持英文名称不变
+                            categoryText = prediction.category;
+                          }
+                          
+                          return (
+                            <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: index < analysisResults.predictions.length - 1 ? `1px solid ${themeColors.colorBorder}` : 'none' }}>
+                              <span style={{ fontSize: 13, color: themeColors.colorTextTertiary, maxWidth: '60%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {fileName}
+                              </span>
+                              <span style={{ fontSize: 13, ...categoryStyle, fontWeight: 'bold' }}>
+                                {categoryText}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                   

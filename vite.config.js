@@ -11,6 +11,18 @@ export default defineConfig({
         target: 'http://localhost:8000', // 后端FastAPI服务器地址
         changeOrigin: true,
         secure: false
+      },
+      // 添加对/upload路径的代理配置，解决CORS问题
+      '/upload': {
+        target: 'https://ferny-darlene-unled.ngrok-free.dev',
+        changeOrigin: true,
+        secure: false
+      },
+      // 添加对/predict路径的代理配置
+      '/predict': {
+        target: 'https://ferny-darlene-unled.ngrok-free.dev',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

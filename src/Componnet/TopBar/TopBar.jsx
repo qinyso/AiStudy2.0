@@ -29,6 +29,7 @@ import {
   LoginOutlined,
   UserAddOutlined,
   MonitorOutlined,
+  FileImageOutlined,
 } from '@ant-design/icons';
 import './TopBar.css';
 
@@ -51,11 +52,22 @@ const { Header } = Layout;
   },
   {
     key:'3',
-    label:'文件上传',
+    label:'病灶分类',
     path:'/upload',
     icon: <FileTextOutlined />,
   },
- 
+ {
+    key:'4',
+    label:'报告生成',
+    path:'/report',
+    icon: <MonitorOutlined />,
+  },
+  {
+    key:'5',
+    label:'WSI分割与计数',
+    path:'/divide',
+    icon: <FileImageOutlined />,
+  },
 
 ];
 
@@ -164,7 +176,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
           color: '#0ea5e9',
           textShadow: '0 0 10px rgba(14, 165, 233, 0.6)',
         }}>
-         AI病理研究
+         AI肾病智能研究
         </span>
       </div>
       
