@@ -14,7 +14,7 @@ const AIchat = () => {
     {
       id: '1',
       type: 'ai',
-      content: '您好！我是AI病理辅助诊断助手。请问您有什么需要帮助的吗？我可以为您解答病理分析相关的问题。',
+      content: '您好！我是AI肾病辅助诊断助手。请问您有什么需要帮助的吗？我可以为您解答肾病分析相关的问题。',
       timestamp: new Date().toLocaleTimeString()
     }
   ])
@@ -223,7 +223,7 @@ const AIchat = () => {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           textShadow: '0 0 30px rgba(14, 165, 233, 0.3)'
-        }}>AI病理分析助手</h1>
+        }}>AI肾病分析助手</h1>
         <p style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: '10px' }}>智能对话 · 精准分析 · 辅助诊断</p>
       </div>
       
@@ -402,7 +402,7 @@ const AIchat = () => {
                       backgroundColor: 'rgba(14, 165, 233, 0.2)'
                     }
                   }}
-                  onClick={() => message.info('这是一个AI病理辅助诊断助手，可以回答您关于病理分析的问题。')}
+                  onClick={() => message.info('这是一个AI肾病辅助诊断助手，可以回答您关于肾病分析的问题。')}
                 >
                   帮助
                 </Button>

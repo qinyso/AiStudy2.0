@@ -276,7 +276,7 @@ const Enter = () => {
             marginBottom: '8px',
             textShadow: '0 2px 4px rgba(14, 165, 233, 0.3)'
           }}>
-            登录到 AI病理研究
+            登录到 AI肾病研究
           </h1>
           <p style={{
             color: '#64748b',

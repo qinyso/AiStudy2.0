@@ -1,0 +1,227 @@
+/* Number.css - WSI图像分割与肾小球计数页面样式 */
+
+/* 全局样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 页面容器样式 */
+.number-page {
+  min-height: 100vh;
+  background-color: #0a0e17;
+  background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 47, 73, 0.9) 100%);
+  color: #f1f5f9;
+}
+
+/* 拖拽上传区域样式增强 */
+.ant-upload-drag {
+  transition: all 0.3s ease;
+}
+
+.ant-upload-drag:hover {
+  transform: translateY(-2px);
+}
+
+/* 卡片样式增强 */
+.ant-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* 图像卡片样式增强 */
+.image-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* 图像悬停效果 */
+.image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.image-container img {
+  transition: transform 0.5s ease;
+}
+
+.image-container:hover img {
+  transform: scale(1.05);
+}
+
+/* 按钮样式增强 */
+.ant-btn {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.ant-btn-primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* 标题样式 */
+.section-title {
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 模态框样式增强 */
+.ant-modal {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-modal-content {
+  background-color: #1e293b;
+  border: none;
+  border-radius: 12px;
+}
+
+.ant-modal-header {
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.ant-modal-title {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+/* 计数结果显示样式 */
+.count-display {
+  animation: countAppear 0.6s ease-out;
+}
+
+@keyframes countAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 进度指示器样式 */
+.progress-container {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: rgba(15, 23, 42, 0.5);
+  border-radius: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .column-style {
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .images-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .image-card {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 640px) {
+  .number-page {
+    padding: 10px;
+  }
+  
+  .title-style {
+    font-size: 20px;
+  }
+  
+  .ant-upload-drag {
+    min-height: 300px;
+  }
+  
+  .ant-card {
+    min-height: 300px;
+  }
+  
+  .count-display {
+    font-size: 36px;
+  }
+}
+
+/* 加载动画增强 */
+.loading-spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 处理信息标签样式 */
+.info-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  background-color: rgba(15, 23, 42, 0.8);
+  border-radius: 16px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

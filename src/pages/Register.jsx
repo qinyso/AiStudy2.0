@@ -429,7 +429,7 @@ const Register = () => {
               marginBottom: '8px',
               textShadow: '0 2px 4px rgba(14, 165, 233, 0.3)'
             }}>
-              AI病理研究平台
+              AI肾病研究平台
             </h1>
             <p style={{
               color: '#64748b',
@@ -625,7 +625,7 @@ const Register = () => {
                   }
                 }}
               >
-                进入AI病理研究平台
+                进入AI肾病研究平台
               </Button>
             </Form.Item>
 

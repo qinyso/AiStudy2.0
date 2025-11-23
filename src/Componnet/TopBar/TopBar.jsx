@@ -64,9 +64,15 @@ const { Header } = Layout;
   },
   {
     key:'5',
-    label:'细胞分割与计数',
+    label:'细胞核计数',
     path:'/divide',
     icon: <FileImageOutlined />,
+  },
+  {
+    key:'6',
+    label:'肾小球计数',
+    path:'/number',
+    icon: <TeamOutlined />,
   },
 
 ];

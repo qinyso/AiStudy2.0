@@ -11,6 +11,7 @@ import Register from '../pages/Register';
 import Upload from '../pages/Upload/Upload';
 import Report from '../pages/Report/Report';
 import Divide from '../pages/Divide/Divide';
+import Number from '../pages/Number/Number';
 // 私有路由组件：检查用户是否已登录
 const PrivateRoute = () => {
   // 检查 localStorage 中是否有 token
@@ -33,8 +34,9 @@ const AppRoutes = () => {
         <Route path="/single" element={<Single />} />
         <Route path="/AIchat" element={<AIchat />} />
         <Route path="/upload" element={<Upload />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/divide" element={<Divide />} />
+      <Route path="/report" element={<Report />} />
+      <Route path="/divide" element={<Divide />} />
+      <Route path="/number" element={<Number />} />
       </Route>
       
       {/* 404 页面 - 重定向到首页 */}                     

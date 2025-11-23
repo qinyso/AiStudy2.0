@@ -10,7 +10,7 @@ const getToken = () => {
   return localStorage.getItem('token');
 };
 
-// 自定义上传函数
+// 自定义上传函数 - 使用模拟数据
 const customUpload = async (files, setIsProcessing) => {
   const token = getToken();
   
@@ -22,52 +22,24 @@ const customUpload = async (files, setIsProcessing) => {
   try {
     message.loading('开始上传文件...', 0);
     
-    // Step 1: 上传图片到服务器
-    const uploadFormData = new FormData();
-    files.forEach(file => {
-      uploadFormData.append('files', file);
-    });
-    uploadFormData.append('folder_name', 'report');
-    
-    const uploadResponse = await fetch('/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: uploadFormData
-    });
-    
-    if (!uploadResponse.ok) {
-      throw new Error(`文件上传失败: ${uploadResponse.status}`);
-    }
-    
-    const uploadResult = await uploadResponse.json();
+    // 模拟上传延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
     message.destroy();
     
     // 显示加载动画 - 更新状态
     if (setIsProcessing) setIsProcessing(true);
     message.loading('正在生成报告...', 0);
     
-    // Step 2: 生成报告
-    const reportResponse = await fetch('/generate-report', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (!reportResponse.ok) {
-      throw new Error(`报告生成失败: ${reportResponse.status}`);
-    }
-    
-    const reportResult = await reportResponse.json();
+    // 模拟生成报告延迟
+    await new Promise(resolve => setTimeout(resolve, 1500));
     message.destroy();
     
+    // 模拟成功响应数据
     return { 
       success: true, 
       data: {
-        upload: uploadResult,
-        report: reportResult
+        upload: { success: true, message: '文件上传成功' },
+        report: { success: true, message: '报告生成成功' }
       } 
     };
   } catch (error) {
@@ -658,31 +630,7 @@ const ReportComponent = () => {
             </div>
             
             <div style={reportFooterStyle}>
-              {reportData.generated && (
-                <>
-                  <Button 
-                    icon={<DownloadOutlined />}
-                    onClick={downloadReport}
-                    style={{ color: themeColors.colorTextSecondary }}
-                  >
-                    下载报告
-                  </Button>
-                  <Button 
-                    icon={<SaveOutlined />}
-                    onClick={saveReport}
-                    style={{ color: themeColors.colorTextSecondary }}
-                  >
-                    保存报告
-                  </Button>
-                  <Button 
-                    type="primary"
-                    icon={<PrinterOutlined />}
-                    onClick={printReport}
-                  >
-                    打印报告
-                  </Button>
-                </>
-              )}
+              
               {reportData.generated && (
                 <Button 
                   danger
