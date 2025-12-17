@@ -8,37 +8,7 @@ import {
 import { message, Upload, Button, Modal, Card, Spin, Progress } from 'antd';
 const { Dragger } = Upload;
 import { themeColors } from '../../theme';
-import z4 from '../../assets/z4.png';
-import z3 from '../../assets/z3.png';
-import z2 from '../../assets/z2.png';
-import z1 from '../../assets/z1.png';
-// 示例病理图数据
-const exampleImages = [
-  {
-    id: 1,
-    name: 'IgA肾病切片',
-    description: '系膜细胞增生，系膜区增宽，免疫复合物沉积',
-    src: z1
-  },
-  {
-    id: 2,
-    name: '膜性肾病切片',
-    description: '基底膜增厚，上皮下电子致密物沉积',
-    src: z2
-  },
-  {
-    id: 3,
-    name: '微小病变肾病',
-    description: '肾小球基本正常，肾小管上皮细胞变性',
-    src: z3
-  },
-  {
-    id: 4,
-    name: '膜增生性肾小球肾炎',
-    description: '系膜插入，基底膜呈双轨征',
-    src: z4
-  }
-];
+
 
 const ReportComponent = () => {
   // 状态管理
@@ -697,15 +667,7 @@ const ReportComponent = () => {
                         }}
                         className="uploaded-file-item"
                       >
-                        <img 
-                          src={file.url || file.thumbUrl} 
-                          alt={file.name} 
-                          style={{
-                            width: '100%',
-                            height: '100px',
-                            objectFit: 'cover'
-                          }}
-                        />
+                        
                         <div className="report-image-actions" style={{
                           position: 'absolute',
                           top: '8px',
@@ -862,127 +824,8 @@ const ReportComponent = () => {
           </div>
         </Modal>
         
-        {/* 示例病理图弹窗 */}
-        <Modal
-          title="示例病理图"
-          open={exampleModalVisible}
-          onCancel={handleCloseExampleModal}
-          footer={null}
-          width={860}
-          centered
-        >
-          <div style={{ maxHeight: '70vh', overflowY: 'auto', padding: '10px' }}>
-            <p style={{ 
-              fontSize: 14, 
-              color: MEDICAL_THEME.textSecondary, 
-              margin: '0 0 20px 0',
-              padding: '12px',
-              backgroundColor: MEDICAL_THEME.backgroundTertiary,
-              borderRadius: '8px'
-            }}>
-              点击下方病理图查看大图，可作为参考样例上传分析
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-              {exampleImages.map((example) => (
-                <div 
-                  key={example.id} 
-                  style={{
-                    padding: '16px',
-                    border: `1px solid ${MEDICAL_THEME.borderLight}`,
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    backgroundColor: MEDICAL_THEME.background,
-                    boxShadow: MEDICAL_THEME.boxShadowSmall
-                  }}
-                  onClick={() => handleExampleImageClick(example)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = MEDICAL_THEME.boxShadowMedium;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = MEDICAL_THEME.boxShadowSmall;
-                  }}
-                >
-                  <div style={{ position: 'relative', marginBottom: '12px', borderRadius: '8px', overflow: 'hidden' }}>
-                    <img 
-                      src={example.src} 
-                      alt={example.name} 
-                      style={{ 
-                        width: '100%', 
-                        height: '180px', 
-                        borderRadius: '8px', 
-                        objectFit: 'cover',
-                        border: `1px solid ${MEDICAL_THEME.borderLight}`
-                      }}
-                    />
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                      color: 'white',
-                      padding: '8px 12px',
-                      fontSize: 13,
-                      borderRadius: '0 0 8px 8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <EyeOutlined /> 点击查看大图
-                    </div>
-                  </div>
-                  <h4 style={{ 
-                    margin: '0 0 8px 0', 
-                    fontSize: 16, 
-                    color: MEDICAL_THEME.text, 
-                    fontWeight: 600 
-                  }}>
-                    {example.name}
-                  </h4>
-                  <p style={{ 
-                    margin: 0, 
-                    fontSize: 14, 
-                    color: MEDICAL_THEME.textSecondary, 
-                    lineHeight: 1.6 
-                  }}>
-                    {example.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Modal>
-        
-        {/* 图片预览弹窗 */}
-        <Modal
-          open={previewVisible}
-          title="病理图片预览"
-          footer={null}
-          onCancel={() => setPreviewVisible(false)}
-          width="80%"
-          centered
-        >
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            padding: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.05)'
-          }}>
-            <img 
-              src={previewImage} 
-              alt="病理图片预览" 
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '80vh', 
-                borderRadius: '8px',
-                boxShadow: MEDICAL_THEME.boxShadowLarge
-              }} 
-            />
-          </div>
-        </Modal>
+       
+       
         
         {/* 右侧：报告展示区域 */}
         <div ref={reportRef} className="report-right-column" style={{
@@ -1032,35 +875,8 @@ const ReportComponent = () => {
                   gap: '12px',
                   flexWrap: 'wrap'
                 }}>
-                  <Button 
-                    size="middle" 
-                    type="primary" 
-                    icon={<FilePdfOutlined />}
-                    onClick={handleExportPDF}
-                    className="report-export-button"
-                    style={{
-                      background: 'linear-gradient(135deg, #06b6d4, #0e7490)',
-                      borderColor: '#06b6d4',
-                      borderRadius: '8px',
-                      fontWeight: 600,
-                      boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
-                    }}
-                  >
-                    导出 PDF
-                  </Button>
-                  <Button 
-                    size="middle" 
-                    icon={<CopyOutlined />}
-                    onClick={handleCopyConclusion}
-                    style={{
-                      color: '#06b6d4',
-                      borderColor: '#06b6d4',
-                      borderRadius: '8px',
-                      fontWeight: 600
-                    }}
-                  >
-                    复制结论
-                  </Button>
+                
+                
                   <div className="report-generated-time" style={{
                     fontSize: 12,
                     color: '#5eead4',
@@ -1369,18 +1185,7 @@ const ReportComponent = () => {
                             borderRadius: '8px',
                             backgroundColor: MEDICAL_THEME.backgroundTertiary
                           }}>
-                            <img 
-                              src={image.url} 
-                              alt={`病理图片 ${index + 1}`} 
-                              style={{
-                                width: '60px',
-                                height: '60px',
-                                objectFit: 'cover',
-                                borderRadius: '6px',
-                                border: `1px solid ${MEDICAL_THEME.borderLight}`,
-                                boxShadow: MEDICAL_THEME.boxShadowSmall
-                              }}
-                            />
+                          
                             <div className="report-image-info">
                               <p className="report-image-name" style={{
                                 margin: 0,
