@@ -4,77 +4,112 @@ import { InboxOutlined, FileTextOutlined, FolderOutlined, LoadingOutlined, Reloa
 import { message, Upload, Button, Modal, Card } from 'antd';
 const { Dragger } = Upload;
 import { themeColors } from '../../theme';
+import { FileService } from '../../utils/fileService';
 
 // 从localStorage获取token
 const getToken = () => {
   return localStorage.getItem('token');
 };
 
-// 模拟WSI处理函数 - 将图片分割成patch并生成mask
-const processWSIWithPatch = async (files) => {
-  // 模拟处理延迟
-  await new Promise(resolve => setTimeout(resolve, 3000));
-  
-  // 模拟肾小球数量（随机生成，范围50-200）
-  const glomerulusCount = Math.floor(Math.random() * 150) + 50;
-  
-  // 模拟生成的图片URL（使用占位图）
-  const originalImage = URL.createObjectURL(files[0]);
-  
-  // 生成模拟的mask图片（这里使用原始图片作为模拟，实际应用中需要根据处理结果生成）
-  // 由于不能直接生成mask，我们使用模拟数据
-  const maskImage = originalImage; // 实际应用中应替换为真实的mask图像
-  const overlayImage = originalImage; // 实际应用中应替换为带有标记的叠加图像
-  
-  return {
-    success: true,
-    data: {
-      glomerulusCount,
-      originalImage,
-      maskImage,
-      overlayImage,
-      processingDetails: {
-        totalPatches: 128, // 模拟分割成128个patch
-        processedPatches: 128,
-        patchSize: '512x512',
-        processingTime: '2.8s'
-      }
+// WSI处理函数 - 使用FileService进行肾小球计数分析
+const processWSIWithPatch = async (fileId) => {
+  try {
+    // 启动肾小球计数分析任务
+    const taskResponse = await FileService.startAnalysisTask(fileId, 'glomeruli_count', {});
+    
+    if (!taskResponse.success) {
+      throw new Error(taskResponse.message || '启动分析任务失败');
     }
-  };
+    
+    const taskId = taskResponse.data.task_id;
+    
+    // 轮询任务状态直到完成
+    let taskResult;
+    let attempts = 0;
+    const maxAttempts = 60; // 最多等待60轮，每轮5秒，共5分钟
+    const intervalTime = 5000; // 5秒轮询一次
+    
+    while (attempts < maxAttempts) {
+      attempts++;
+      
+      // 查询任务状态
+      const statusResponse = await FileService.getTaskStatus(taskId);
+      
+      if (!statusResponse.success) {
+        throw new Error(statusResponse.message || '查询任务状态失败');
+      }
+      
+      const taskData = statusResponse.data;
+      
+      // 检查任务是否完成
+      if (taskData.status === 'completed') {
+        taskResult = taskData;
+        break;
+      } else if (taskData.status === 'failed') {
+        throw new Error(taskData.error || '分析任务失败');
+      }
+      
+      // 等待下一次轮询
+      await new Promise(resolve => setTimeout(resolve, intervalTime));
+    }
+    
+    if (!taskResult) {
+      throw new Error('分析任务超时');
+    }
+    
+    // 构造返回数据结构，适配原有的调用方式
+    return {
+      success: true,
+      data: {
+        glomerulusCount: taskResult.glomeruli_count || 0,
+        originalImage: taskResult.original_url || '',
+        maskImage: taskResult.mask_url || '',
+        overlayImage: taskResult.overlay_url || '',
+        processingDetails: {
+          totalPatches: taskResult.total_patches || 0,
+          processedPatches: taskResult.processed_patches || 0,
+          patchSize: taskResult.patch_size || '0x0',
+          processingTime: `${taskResult.processing_time || 0}s`
+        }
+      }
+    };
+  } catch (error) {
+    console.error('WSI处理失败:', error);
+    throw error;
+  }
 };
 
 // 自定义上传函数
-const customUpload = async (files, setIsProcessing) => {
-  const token = getToken();
-  
-  if (!token) {
-    message.error('请先登录再上传文件');
-    return { success: false, message: '未登录' };
-  }
-  
+const customUpload = async (file, setIsProcessing) => {
   try {
     message.loading('开始上传WSI图像...', 0);
     
-    // 模拟上传延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 使用FileService上传文件
+    const uploadResult = await FileService.uploadFile(file);
     message.destroy();
+    
+    if (!uploadResult.success) {
+      throw new Error(uploadResult.message || '文件上传失败');
+    }
     
     // 显示加载动画 - 更新状态
     if (setIsProcessing) setIsProcessing(true);
-    message.loading('正在分割图像并生成mask...', 0);
+    message.loading('正在分析图像并计算肾小球数量...', 0);
     
-    // 处理WSI图像
-    const processResult = await processWSIWithPatch(files);
+    // 获取上传文件的ID并调用处理API
+    const fileId = uploadResult.data.id;
+    const processResult = await processWSIWithPatch(fileId);
     message.destroy();
     
     return { 
       success: true, 
-      data: processResult.data
+      data: processResult.data,
+      fileId: fileId
     };
   } catch (error) {
     message.destroy();
     console.error('处理错误:', error);
-    return { success: false, message: error.message };
+    return { success: false, message: error.message || '处理失败' };
   } finally {
     // 无论成功失败，都隐藏加载动画
     if (setIsProcessing) setIsProcessing(false);
@@ -100,23 +135,18 @@ const handleFileSelect = async (files, handleResultsUpdate, setIsProcessing) => 
     message.warning('一次仅支持上传一个WSI图像，将处理第一个文件');
   }
   
-  message.loading(`正在处理WSI图像...`, 0);
-  
   try {
-    const uploadResult = await customUpload([imageFiles[0]], setIsProcessing);
+    const uploadResult = await customUpload(imageFiles[0], setIsProcessing);
     
     if (uploadResult.success) {
-      message.destroy();
-      message.success(`WSI图像处理成功！`);
+      message.success(`WSI图像处理成功！检测到 ${uploadResult.data.glomerulusCount} 个肾小球`);
       // 更新分析结果
-      handleResultsUpdate(uploadResult.data, imageFiles[0]);
+      handleResultsUpdate(uploadResult.data, imageFiles[0], uploadResult.fileId);
     } else {
-      message.destroy();
       message.error(`处理失败: ${uploadResult.message}`);
     }
   } catch (error) {
-    message.destroy();
-    message.error(`处理过程中发生错误: ${error.message}`);
+    message.error(`处理过程中发生错误: ${error.message || '未知错误'}`);
     if (setIsProcessing) setIsProcessing(false);
   }
 };
@@ -150,7 +180,7 @@ const NumberComponent = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   
   // 处理结果更新
-  const handleResultsUpdate = (results, file) => {
+  const handleResultsUpdate = (results, file, fileId = null) => {
     setAnalysisResults({
       processed: true,
       glomerulusCount: results.glomerulusCount,
@@ -158,7 +188,8 @@ const NumberComponent = () => {
       maskImage: results.maskImage,
       overlayImage: results.overlayImage,
       processingDetails: results.processingDetails,
-      uploadedFile: file
+      uploadedFile: file,
+      fileId: fileId // 保存上传文件的ID，便于后续操作
     });
   };
   
@@ -201,15 +232,28 @@ const NumberComponent = () => {
     openUploadModal();
   };
   
-  // 上传组件样式
+  // 上传容器样式
   const uploadContainerStyle = {
-    marginTop: 40,
-    padding: '0 20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    minHeight: '80vh',
-    width: '100%',
+    width: '100vw',
+    minHeight: '100vh',
+    padding: '60px 20px 20px',
+    background: 'rgba(15, 23, 42, 0.3)',
+    overflowX: 'hidden',
+    position: 'relative',
+    backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 20%), radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 20%)',
+  };
+  
+  // 背景模糊效果
+  const backgroundBlurStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%)',
+    zIndex: -1,
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
   };
   
   // 验证token是否存在
@@ -245,9 +289,12 @@ const NumberComponent = () => {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '20px',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
     '&:hover': {
       borderColor: themeColors.colorPrimary,
       boxShadow: themeColors.boxShadow.medium,
+      transform: 'translateY(-2px)',
     }
   };
 
@@ -262,15 +309,19 @@ const NumberComponent = () => {
     display: 'flex',
     flexDirection: 'column',
     margin: 0,
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
   };
 
   // 标题样式
   const titleStyle = {
-    fontSize: 24,
-    fontWeight: 600,
+    fontSize: 28,
+    fontWeight: 700,
     color: themeColors.colorPrimary,
-    marginBottom: 20,
+    marginBottom: 30,
     textAlign: 'center',
+    textShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+    letterSpacing: '0.5px',
   };
 
   // 图像容器样式
@@ -284,9 +335,17 @@ const NumberComponent = () => {
 
   // 单个图像卡片样式
   const imageCardStyle = {
-    width: 'calc(50% - 10px)',
-    minWidth: '250px',
+    width: 'calc(33.333% - 10px)',
+    minWidth: '200px',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
     marginBottom: 15,
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.25)',
+    }
   };
 
   // 图像样式
@@ -296,10 +355,17 @@ const NumberComponent = () => {
     maxHeight: '300px',
     objectFit: 'contain',
     borderRadius: 8,
+    transition: 'transform 0.5s ease',
+    '&:hover': {
+      transform: 'scale(1.05)',
+    }
   };
   
   return (
       <div style={uploadContainerStyle}>
+        {/* 背景模糊效果 */}
+        <div style={backgroundBlurStyle}></div>
+        
         <h1 style={titleStyle}>WSI图像分割与肾小球计数</h1>
         
         <div style={mainContentStyle}>
@@ -324,7 +390,21 @@ const NumberComponent = () => {
                     type="primary" 
                     icon={<FileTextOutlined />}
                     onClick={(e) => { e.stopPropagation(); handleFileUpload(); }}
-                    style={{ maxWidth: '300px', alignSelf: 'center' }}
+                    style={{ 
+                      maxWidth: '300px', 
+                      alignSelf: 'center',
+                      background: `linear-gradient(135deg, ${themeColors.colorPrimary} 0%, ${themeColors.colorPrimary}dd 100%)`,
+                      border: `1px solid ${themeColors.colorPrimary}`,
+                      borderRadius: 8,
+                      padding: '12px 24px',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.3s ease',
+                      height: '50px',
+                    }}
                   >
                     上传WSI图像
                   </Button>
@@ -337,7 +417,20 @@ const NumberComponent = () => {
                     type="primary" 
                     icon={<ReloadOutlined />}
                     onClick={handleReupload}
-                    style={{ maxWidth: '300px', alignSelf: 'center' }}
+                    style={{ 
+                      maxWidth: '300px', 
+                      alignSelf: 'center',
+                      background: `linear-gradient(135deg, ${themeColors.colorPrimary} 0%, ${themeColors.colorPrimary}dd 100%)`,
+                      border: `1px solid ${themeColors.colorPrimary}`,
+                      borderRadius: 8,
+                      padding: '12px 24px',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      height: '50px',
+                      boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.3s ease',
+                    }}
                   >
                     重新上传
                   </Button>
@@ -353,20 +446,36 @@ const NumberComponent = () => {
             onCancel={closeUploadModal}
             footer={null}
             width={400}
+            style={{ borderRadius: '12px', overflow: 'hidden' }}
           >
-            <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-              <Button 
-                type="primary" 
-                size="large"
-                icon={<FileTextOutlined />}
-                onClick={handleFileUpload}
-                style={{ width: '80%', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                上传WSI图像文件
-              </Button>
-              <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto' }}>
-                支持 .jpg, .jpeg, .png, .tif, .tiff, .svs, .ndpi 格式
-              </p>
+            <div style={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', padding: '0' }}>
+              <div style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #334155', padding: '16px 24px' }}>
+                <h3 style={{ color: '#ffffff', margin: '0', fontWeight: '600' }}>选择上传方式</h3>
+              </div>
+              <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', padding: '24px' }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<FileTextOutlined />}
+                  onClick={handleFileUpload}
+                  style={{ 
+                    width: '85%', 
+                    height: '50px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: `linear-gradient(135deg, ${themeColors.colorPrimary} 0%, ${themeColors.colorPrimary}dd 100%)`,
+                    border: `1px solid ${themeColors.colorPrimary}`,
+                    boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  上传WSI图像文件
+                </Button>
+                <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto', textAlign: 'center' }}>
+                  支持 .jpg, .jpeg, .png, .tif, .tiff, .svs, .ndpi 格式
+                </p>
+              </div>
             </div>
           </Modal>
           

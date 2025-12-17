@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import { 
@@ -8,29 +8,17 @@ import {
   PhoneOutlined
 } from '@ant-design/icons';
 import axiosInstance from '../../utils/axiosInstance';
+import VantaBackground from '../../Componnet/VantaBackground';
 
 const Enter = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const canvasRef = useRef(null);
   const navigate = useNavigate();
   const primaryColor = '#0ea5e9';
   
-  // 处理窗口大小变化
+  // 添加CSS动画 - 医疗蓝色系
   useEffect(() => {
-    const updateDimensions = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
-    
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    
-    // 添加CSS动画 - 医疗蓝色系
     const style = document.createElement('style');
     style.innerHTML = `
       @keyframes float {
@@ -49,106 +37,9 @@ const Enter = () => {
     document.head.appendChild(style);
     
     return () => {
-      window.removeEventListener('resize', updateDimensions);
       document.head.removeChild(style);
     };
   }, []);
-
-  // 创建粒子背景效果 - 与首页一致的医疗蓝色系
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
-
-    // 粒子类 - 医疗蓝色系
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        // 随机选择医疗蓝色系颜色
-        const colors = [
-          `rgba(14, 165, 233, ${Math.random() * 0.4 + 0.1})`,
-          `rgba(2, 132, 199, ${Math.random() * 0.4 + 0.1})`,
-          `rgba(8, 145, 178, ${Math.random() * 0.4 + 0.1})`
-        ];
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x > canvas.width) this.x = 0;
-        else if (this.x < 0) this.x = canvas.width;
-        if (this.y > canvas.height) this.y = 0;
-        else if (this.y < 0) this.y = canvas.height;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        
-        // 添加辉光效果
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.color;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-
-      connect(particles) {
-        particles.forEach(particle => {
-          const dx = this.x - particle.x;
-          const dy = this.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 80) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(14, 165, 233, ${0.2 * (1 - distance / 80)})`;
-            ctx.lineWidth = 0.5 * (1 - distance / 80);
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(particle.x, particle.y);
-            ctx.stroke();
-          }
-        });
-      }
-    }
-
-    // 创建粒子
-    const particles = [];
-    const particleCount = 120;
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-
-    // 动画循环
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-        particle.connect(particles);
-      });
-
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animate);
-    };
-  }, [dimensions]);
   
   const onFinish = async (values) => {
     setLoading(true);
@@ -160,16 +51,21 @@ const Enter = () => {
       
       console.log('登录成功响应:', response.data);
       
-      // 存储登录信息 - 更正字段名以匹配后端返回的数据结构
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userInfo',
-        JSON.stringify(
-          {
-            user_id: response.data.user_info?.id,
-            username: response.data.user_info?.username || values.username,
-          }
-        )
-      );
+      // 存储登录信息 - 统一与Register.jsx的处理逻辑
+      if (response.data && response.data.data) {
+        localStorage.setItem('token', response.data.data.token);
+        localStorage.setItem('userInfo', JSON.stringify({
+          user_id: response.data.data.user_info?.id || '',
+          username: response.data.data.user_info?.username || values.username
+        }));
+      } else {
+        // 兼容旧的响应格式
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userInfo', JSON.stringify({
+          user_id: response.data.user_info?.id || '',
+          username: response.data.user_info?.username || values.username
+        }));
+      }
       
       message.success('登录成功！正在进入系统...');
       
@@ -198,10 +94,6 @@ const Enter = () => {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      // 与首页一致的医疗蓝色系渐变背景
-      background: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #0f172a 100%)',
-      backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
       color: '#ffffff',
       padding: '24px',
       position: 'relative',
@@ -209,21 +101,11 @@ const Enter = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: 'Arial, sans-serif',
+      width: '100%',
+      height: '100%',
+      minHeight: 'calc(100vh - 64px)' // 减去TopBar的高度
     }}>
-      
-      {/* 粒子背景canvas */}
-      <canvas 
-        ref={canvasRef} 
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none'
-        }}
-      />
       {/* 装饰性元素 - 左侧 */}
       <div style={{
         position: 'absolute',

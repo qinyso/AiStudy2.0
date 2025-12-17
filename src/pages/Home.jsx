@@ -8,191 +8,11 @@ import m2 from '../assets/m2.jpeg';
 import m3 from '../assets/m3.jpeg';
 import m4 from '../assets/m4.jpeg';
 
-// 导航菜单项 - AI肾病智能研究相关
-const navItems = ['研究概述', '病理分析', '诊断案例', '技术支持', '关于我们'];
 
-// 3D立方体组件 - 改为医疗蓝色调
-const Cube = ({ size = 100, color = '#0ea5e9', x = 0, y = 0, rotation = 0 }) => {
-  return (
-    <div 
-      className="cube"
-      style={{
-        position: 'absolute',
-        left: `${x}%`,
-        top: `${y}%`,
-        width: size,
-        height: size,
-        transformStyle: 'preserve-3d',
-        transform: `rotateY(${rotation}deg) rotateX(${rotation * 0.5}deg)`,
-        animation: 'rotateCube 15s infinite linear',
-        opacity: 0.8
-      }}
-    >
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        backgroundColor: color,
-        opacity: 0.8,
-        transform: 'translateZ(50px)',
-        boxShadow: `0 0 20px ${color}`
-      }} />
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        backgroundColor: color,
-        opacity: 0.8,
-        transform: 'rotateY(90deg) translateZ(50px)',
-        boxShadow: `0 0 20px ${color}`
-      }} />
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        backgroundColor: color,
-        opacity: 0.8,
-        transform: 'rotateY(180deg) translateZ(50px)',
-        boxShadow: `0 0 20px ${color}`
-      }} />
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        backgroundColor: color,
-        opacity: 0.8,
-        transform: 'rotateY(-90deg) translateZ(50px)',
-        boxShadow: `0 0 20px ${color}`
-      }} />
-    </div>
-  );
-};
 
-// 显微镜图形组件 - 替换VR头盔
-const Microscope = ({ size = 150, x = 0, y = 0 }) => {
-  return (
-    <div 
-      style={{
-        position: 'absolute',
-        left: `${x}%`,
-        top: `${y}%`,
-        width: size,
-        height: size,
-        transform: 'translate(-50%, -50%)',
-        opacity: 0.9,
-        zIndex: 2
-      }}
-    >
-      {/* 显微镜底座 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '60%',
-        height: '15%',
-        borderRadius: '5px',
-        background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-        boxShadow: '0 0 15px rgba(14, 165, 233, 0.6)'
-      }} />
-      {/* 显微镜支柱 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '15%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '10%',
-        height: '70%',
-        background: 'linear-gradient(180deg, #0ea5e9, #0284c7)',
-        boxShadow: '0 0 15px rgba(14, 165, 233, 0.6)'
-      }} />
-      {/* 显微镜臂 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '60%',
-        left: '50%',
-        width: '50%',
-        height: '8%',
-        borderRadius: '8px 0 0 8px',
-        background: 'linear-gradient(90deg, #0ea5e9, #0284c7)',
-        boxShadow: '0 0 15px rgba(14, 165, 233, 0.6)'
-      }} />
-      {/* 显微镜镜头 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '35%',
-        left: '25%',
-        width: '15%',
-        height: '20%',
-        borderRadius: '50% 50% 0 0',
-        background: 'linear-gradient(180deg, #0ea5e9, #0284c7)',
-        boxShadow: '0 0 15px rgba(14, 165, 233, 0.6)'
-      }} />
-      {/* 显微镜载玻片 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '25%',
-        left: '22%',
-        width: '20%',
-        height: '3%',
-        background: 'linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.7), rgba(255,255,255,0.3))',
-        border: '1px solid rgba(255,255,255,0.5)'
-      }} />
-    </div>
-  );
-};
 
-// 病理分析设备图形组件 - 替换数字设备
-const PathologyDevice = ({ size = 100, x = 0, y = 0 }) => {
-  return (
-    <div 
-      style={{
-        position: 'absolute',
-        left: `${x}%`,
-        top: `${y}%`,
-        width: size,
-        height: size * 1.4,
-        transform: 'translate(-50%, -50%)',
-        zIndex: 3
-      }}
-    >
-      {/* 设备外壳 */}
-      <div style={{
-        width: '100%',
-        height: '100%',
-        borderRadius: '15px',
-        background: 'linear-gradient(135deg, #0c4a6e, #1e40af)',
-        border: '2px solid rgba(14, 165, 233, 0.2)',
-        boxShadow: '0 0 20px rgba(14, 165, 233, 0.4)'
-      }} />
-      {/* 屏幕 */}
-      <div style={{
-        position: 'absolute',
-        top: '10%',
-        left: '10%',
-        width: '80%',
-        height: '70%',
-        borderRadius: '8px',
-        background: 'linear-gradient(135deg, #0f172a, #1e293b)',
-        border: '1px solid rgba(14, 165, 233, 0.3)'
-      }} />
-      {/* 屏幕内容 - 数字文本 */}
-      <div style={{
-        position: 'absolute',
-        top: '40%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontSize: size * 0.15,
-        fontWeight: 'bold',
-        color: '#0ea5e9',
-        textShadow: '0 0 10px rgba(14, 165, 233, 0.8)',
-        textAlign: 'center'
-      }}>
-        AI肾病<br/>分析系统
-      </div>
-    </div>
-  );
-};
+
+
 
 // 轮播图组件 - 更具高级感的设计
 const ImageCarousel = () => {
@@ -203,17 +23,17 @@ const ImageCarousel = () => {
   
   // 轮播图片数据
   const images = [
-    { src: m1, alt: '肾病研究图片1', caption: '高精度肾脏切片分析', subtitle: 'AI驱动的细胞级精准识别' },
-    { src: m2, alt: '肾病研究图片2', caption: 'AI辅助肾病诊断', subtitle: '深度学习提升诊断准确率' },
-    { src: m3, alt: '肾病研究图片3', caption: '肾脏医学影像智能识别', subtitle: '多模态融合分析系统' },
-    { src: m4, alt: '肾病研究图片4', caption: '数字化肾病研究平台', subtitle: '云端协作与数据分析' }
+    { src: m1, alt: '病理研究图片1', caption: '肾病病理分析', subtitle: '高精度肾脏切片分析，AI驱动的细胞级精准识别' },
+    { src: m2, alt: '病理研究图片2', caption: '脑部病理分析', subtitle: 'AI辅助脑部病变诊断，深度学习提升诊断准确率' },
+    { src: m3, alt: '病理研究图片3', caption: '其他病理分析', subtitle: '多部位医学影像智能识别，多模态融合分析系统' },
+    { src: m4, alt: '病理研究图片4', caption: '数字化病理研究平台', subtitle: '云端协作与多部位病理数据分析' }
   ];
 
   // 自动轮播
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       goToNext();
-    }, 6000); // 延长自动轮播时间至6秒
+    }, 3000); // 延长自动轮播时间至6秒
 
     return () => {
       if (intervalRef.current) {
@@ -279,7 +99,7 @@ const ImageCarousel = () => {
         transform: 'perspective(1000px) rotateX(0deg)',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease'
       }}
-      onMouseMove={handleMouseMove}
+     
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'perspective(1000px) rotateX(1deg) translateY(-5px)';
         e.currentTarget.style.boxShadow = '0 30px 60px rgba(0, 0, 0, 0.45), 0 0 80px rgba(14, 165, 233, 0.6)';
@@ -343,27 +163,8 @@ const ImageCarousel = () => {
                   filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
                 }}
               />
-              {/* 渐变遮罩 */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                height: '50%',
-                background: 'linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent)',
-                pointerEvents: 'none'
-          }} />
-            
-            {/* 光效叠加层 */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, transparent 70%)',
-              pointerEvents: 'none'
-            }} />
+              
+
             </div>
             
             {/* 图片标题区域 - 更高级的设计 */}
@@ -464,57 +265,7 @@ const ImageCarousel = () => {
         ›
       </button>
 
-      {/* 指示器 - 高级设计 */}
-        <div style={{
-          position: 'absolute',
-          bottom: '130px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '15px',
-          zIndex: 20,
-          backgroundColor: 'rgba(15, 23, 42, 0.7)',
-          padding: '8px 20px',
-          borderRadius: '30px',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(14, 165, 233, 0.3)'
-        }}>
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            style={{
-              width: currentIndex === index ? '40px' : '10px',
-              height: '8px',
-              borderRadius: '4px',
-              border: 'none',
-              backgroundColor: currentIndex === index 
-                ? 'rgba(14, 165, 233, 1)' 
-                : 'rgba(255, 255, 255, 0.25)',
-              cursor: 'pointer',
-              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-              boxShadow: currentIndex === index 
-                ? '0 0 15px rgba(14, 165, 233, 1), inset 0 0 5px rgba(255, 255, 255, 0.5)' 
-                : 'none',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-            onMouseEnter={(e) => {
-              if (index !== currentIndex) {
-                e.currentTarget.backgroundColor = 'rgba(14, 165, 233, 0.5)';
-                e.currentTarget.width = '20px';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (index !== currentIndex) {
-                e.currentTarget.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                e.currentTarget.width = '10px';
-              }
-            }}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      
 
       {/* 高级装饰性辉光效果 */}
         <div style={{
@@ -551,22 +302,10 @@ const ImageCarousel = () => {
 
 const Home = () => {
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // 处理窗口大小变化
+
+  // 添加CSS动画 - 修改为医疗蓝色系
   useEffect(() => {
-    const updateDimensions = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
-    
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    
-    // 添加CSS动画 - 修改为医疗蓝色系
     const style = document.createElement('style');
     style.innerHTML = `
       @keyframes rotateCube {
@@ -597,106 +336,9 @@ const Home = () => {
     document.head.appendChild(style);
     
     return () => {
-      window.removeEventListener('resize', updateDimensions);
       document.head.removeChild(style);
     };
   }, []);
-
-  // 创建粒子背景效果 - 修改为医疗蓝色系
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
-
-    // 粒子类 - 修改为医疗蓝色系
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        // 随机选择医疗蓝色系颜色
-        const colors = [
-          `rgba(14, 165, 233, ${Math.random() * 0.4 + 0.1})`,
-          `rgba(2, 132, 199, ${Math.random() * 0.4 + 0.1})`,
-          `rgba(8, 145, 178, ${Math.random() * 0.4 + 0.1})`
-        ];
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x > canvas.width) this.x = 0;
-        else if (this.x < 0) this.x = canvas.width;
-        if (this.y > canvas.height) this.y = 0;
-        else if (this.y < 0) this.y = canvas.height;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        
-        // 添加辉光效果
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.color;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-
-      connect(particles) {
-        particles.forEach(particle => {
-          const dx = this.x - particle.x;
-          const dy = this.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 80) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(14, 165, 233, ${0.2 * (1 - distance / 80)})`;
-            ctx.lineWidth = 0.5 * (1 - distance / 80);
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(particle.x, particle.y);
-            ctx.stroke();
-          }
-        });
-      }
-    }
-
-    // 创建粒子
-    const particles = [];
-    const particleCount = 120;
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-
-    // 动画循环
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-        particle.connect(particles);
-      });
-
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animate);
-    };
-  }, [dimensions]);
 
   const handleLogin = () => {
     navigate('/enter');
@@ -709,40 +351,15 @@ const Home = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      // 修改为医疗蓝色系渐变
-      background: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #0f172a 100%)',
-      backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
       color: '#ffffff',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: 'Arial, sans-serif',
+      width: '100%',
+      height: '100%'
     }}>
-     
+      
 
-      {/* 粒子背景canvas */}
-      <canvas 
-        ref={canvasRef} 
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none'
-        }}
-      />
-
-      {/* 3D装饰元素 - 医疗蓝色系 */}
-      <Cube size={60} color="rgba(14, 165, 233, 0.6)" x={15} y={15} rotation={30} />
-      
-      <Cube size={50} color="rgba(8, 145, 178, 0.6)" x={20} y={80} rotation={60} />
-     
-      
-      {/* 显微镜图形 - 主要视觉元素 */}
-      <Microscope size={180} x={85} y={30} />
-      
-      {/* 病理分析设备图形 */}
-      <PathologyDevice size={120} x={75} y={65} />
 
       {/* 中央内容区域 */}
       <div style={{
@@ -768,7 +385,7 @@ const Home = () => {
             letterSpacing: '1px',
             textTransform: 'uppercase'
           }}>
-            AI肾病智能研究
+            AI病理分析
           </h1>
           <p style={{
             fontSize: '1.1rem',
@@ -777,7 +394,7 @@ const Home = () => {
             margin: '0 auto',
             lineHeight: 1.6
           }}>
-            融合人工智能与肾病学，开启精准诊断与研究新时代
+            融合人工智能与病理学，开启多部位精准诊断与研究新时代
           </p>
         </div>
 
@@ -802,15 +419,16 @@ const Home = () => {
               color: '#ffffff',
               opacity: 0.9
             }}>
-              精准肾病分析解决方案
+              多部位精准病理分析解决方案
             </h2>
             <p style={{
               fontSize: '1rem',
               color: 'rgba(255, 255, 255, 0.6)',
               lineHeight: 1.7
             }}>
-              我们的系统融合了深度学习和医学影像分析技术，为肾病研究人员提供高效、精准的辅助分析工具。
-              通过AI算法快速识别肾脏病变特征，提高分析准确率，缩短研究时间，助力肾病精准医疗。
+              我们的系统融合了深度学习和医学影像分析技术，为病理研究人员提供高效、精准的辅助分析工具。
+              覆盖肾病病理分析、脑部病理分析和其他病理分析，通过AI算法快速识别病变特征，
+              提高分析准确率，缩短研究时间，助力多部位病理精准医疗。
             </p>
           </div>
 
@@ -861,23 +479,12 @@ const Home = () => {
               color: 'rgba(255, 255, 255, 0.5)',
               fontSize: '0.9rem'
             }}>
-              © 2025 AI肾病智能研究 | 精准·智能·创新
+              © 2025 AI病理分析 | 精准·智能·创新
             </p>
         </div>
       </div>
 
-      {/* 装饰性光线效果 - 医疗蓝色系 */}
-      <div style={{
-        position: 'absolute',
-        top: '-50%',
-        right: '-20%',
-        width: '80%',
-        height: '200%',
-        background: 'radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        transform: 'rotate(45deg)',
-        pointerEvents: 'none'
-      }} />
+     
       
       <div style={{
         position: 'absolute',

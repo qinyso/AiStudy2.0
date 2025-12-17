@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Input, Button, Space, Avatar, Typography, message } from 'antd'
 import { SendOutlined, UserOutlined, RobotOutlined, FileTextOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import './AIchat.css'
-
+import axios from 'axios'
 const { TextArea } = Input
 const { Text } = Typography
 
@@ -14,7 +14,7 @@ const AIchat = () => {
     {
       id: '1',
       type: 'ai',
-      content: '您好！我是AI肾病辅助诊断助手。请问您有什么需要帮助的吗？我可以为您解答肾病分析相关的问题。',
+      content: '您好!我是AI病理辅助诊断助手。请问您有什么需要帮助的吗?我可以为您解答病理分析相关的问题。',
       timestamp: new Date().toLocaleTimeString()
     }
   ])
@@ -140,19 +140,74 @@ const AIchat = () => {
   }, [messages])
 
   // 模拟AI回复
-  const getAIResponse = (userMessage) => {
-    const responses = [
-      '根据您的描述，这可能是一个需要进一步检查的情况。建议结合临床症状和其他检查结果进行综合分析。',
-      '从病理角度来看，这种表现通常与炎症反应相关。您可以考虑使用抗炎治疗并定期复查。',
-      '这是一个常见的病理特征，在大多数情况下属于良性变化。但为了确保准确性，建议进行免疫组化检查。',
-      '根据目前的信息，我建议您咨询专业的病理科医生进行详细诊断。AI辅助诊断仅供参考。',
-      '这种模式在多种疾病中都可能出现，需要更多的临床背景信息才能提供更精确的分析。'
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
+  const getAIResponse = async (userMessage) =>{
+  try{
+    const response=await axios.post ('https://api.dify.ai/v1/chat-messages',
+     {
+        inputs: {},
+        query:userMessage,
+        response_mode:'blocking',
+        user:'user-'+Date.now().toString().substr(-6)
+      },
+      {
+        headers:{
+          'content-type':'application/json',
+          'Authorization':'Bearer app-YOEh7tCdTLim1yASHLrSshxL'
+        },
+        timeout:10000,
+      }      
+    );
+    // 从answer字段提取回                 
+    let content = response.data.answer || response.data.content || response.data.choices?.[0]?.message?.content;
+      
+      // 从answer字段的</think>标记后提取中文部分
+      if (content) {
+        // 处理</think>标记
+        if (content.includes('</think>')) {
+          // 使用字符串方法提取</think>后的内容
+          const index = content.indexOf('</think>');
+          if (index !== -1) {
+            // 提取</think>后的所有内容
+            content = content.substring(index + 3).trim();
+          }
+        }
+        
+        // 移除可能的hink>前缀
+        if (content.startsWith('hink>')) {
+          content = content.substring(5).trim();
+        }
+        
+        // 移除星号符号
+        if (content.includes('*')) {
+          content = content.replace(/\*/g, '').trim();
+        }
+        
+        // 更全面的格式清理，移除任何可能的标签或标记
+        content = content.replace(/^\s*<[^>]+>\s*/, '').trim();
+      }
+    
+    
+    
+    return content || '抱歉，我无法理解您的问题。请尝试使用更清晰的方式描述您的需求。'
+  }catch(error){
+    console.error('获取AI回复失败:', error)
+     if (error.response) {
+      // 服务器返回了错误响应
+      return `请求失败: ${error.response.status} - ${error.response.statusText}`;
+    } else if (error.request) {
+      // 请求已发送但没有收到响应
+      return '网络连接失败，请检查您的网络设置。';
+    } else {
+      // 请求配置出错                        
+      return '请求配置错误，请稍后再试。';
+    }
+  }
+    
   }
 
+
   // 发送消息
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return
 
     const newMessage = {
@@ -165,18 +220,27 @@ const AIchat = () => {
     setMessages(prev => [...prev, newMessage])
     setInputValue('')
     setIsLoading(true)
-
-    // 模拟AI回复延迟
-    setTimeout(() => {
+    
+    try {
+      const responseContent = await getAIResponse(inputValue);
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: getAIResponse(inputValue),
+        content: responseContent,
         timestamp: new Date().toLocaleTimeString()
       }
       setMessages(prev => [...prev, aiResponse])
+    } catch (error) {
+      console.error('发送消息失败:', error);
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 2).toString(),
+        type: 'ai',
+        content: '抱歉，我无法处理您的请求。请稍后再试。',
+        timestamp: new Date().toLocaleTimeString()
+      }]);
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   // 处理Enter键发送
@@ -190,13 +254,8 @@ const AIchat = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      // 与首页一致的医疗蓝色系渐变背景
-      background: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #0f172a 100%)',
-      backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
       color: '#ffffff',
       padding: '24px',
-      position: 'relative',
-      overflow: 'hidden',
       fontFamily: 'Arial, sans-serif'
     }}>
       

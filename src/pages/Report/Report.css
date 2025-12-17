@@ -1,27 +1,207 @@
+/* 报告页面主题变量 - 简洁风格，参考Divide页面 */
+:root {
+  --primary-color: #52c41a;
+  --secondary-color: #389e0d;
+  --accent-color: #73d13d;
+  --background-color: #141414; /* 与Divide页面一致的深色背景 */
+  --dark-bg: #1e1e1e;
+  --dark-bg-secondary: #2c2c2c;
+  --dark-bg-tertiary: #3a3a3a;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-tertiary: rgba(255, 255, 255, 0.7);
+  
+  /* 基础功能色彩 */
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #f5222d;
+  --info-color: #1890ff;
+  
+  --shadow-small: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
 /* 报告页面的全局样式 */
 .report-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  position: relative;
+  background-image: radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 20%),
+                    radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+}
+
+/* 渐变背景和光效 */
+.report-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
+  z-index: -1;
+  backdrop-filter: blur(10px);
+}
+
+/* 增强层次感的网格背景 */
+.report-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: -1;
+}
+
+/* 按钮样式增强 */
+.report-button {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.report-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.report-button:active {
+  transform: translateY(0);
+}
+
+/* 彩色按钮样式 */
+.report-button-primary {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.report-button-primary:hover {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.report-button-secondary {
+  background: var(--gradient-secondary) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.report-button-secondary:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.report-button-success {
+  background: var(--gradient-success) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.report-button-success:hover {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.report-button-warning {
+  background: var(--gradient-warning) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.report-button-warning:hover {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.report-button-ghost {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.report-button-ghost:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 渐变边框按钮 */
+.report-button-outline {
+  background: transparent !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+  color: white !important;
+  position: relative;
+  z-index: 1;
+}
+
+.report-button-outline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -2px;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+}
+
+.report-button-outline:hover::before {
+  background: var(--gradient-secondary);
 }
 
 /* 拖拽上传区域的自定义样式 */
 .report-upload-dragger {
   transition: all 0.3s ease;
+  width: 100%;
+  height: 250px;
+  border: 2px dashed var(--primary-color);
+  background-color: rgba(14, 165, 233, 0.05);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .report-upload-dragger:hover {
   transform: translateY(-2px);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--background-color);
 }
 
 /* 上传图标动画 */
 @keyframes pulse {
   0% {
     transform: scale(1);
+    opacity: 0.8;
   }
   50% {
     transform: scale(1.1);
+    opacity: 1;
   }
   100% {
     transform: scale(1);
+    opacity: 0.8;
   }
 }
 
@@ -29,49 +209,146 @@
   animation: pulse 2s infinite ease-in-out;
 }
 
-/* 报告卡片的阴影效果 */
+/* 核心结论高亮动画 */
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+    box-shadow: 0 0 0 rgba(22, 93, 255, 0.4);
+  }
+  50% {
+    background-color: rgba(232, 243, 255, 0.8);
+    box-shadow: 0 0 20px rgba(22, 93, 255, 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 rgba(22, 93, 255, 0.4);
+  }
+}
+
+.highlight-animation {
+  animation: highlight 1s ease-in-out;
+}
+
+/* 报告卡片样式 - 简洁设计，参考Divide页面 */
 .report-card {
   transition: all 0.3s ease;
+  width: 100%;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+/* 不同类型卡片的简洁样式 */
+.report-card.upload-card {
+  background-color: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.report-card.upload-card:hover {
+  background-color: #2c2c2c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.report-card.example-card {
+  background-color: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.report-card.example-card:hover {
+  background-color: #2c2c2c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.report-card.report-area {
+  background-color: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.report-card.report-area::before {
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.4), transparent);
+}
+
+.report-card.report-area:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 
+              0 0 25px rgba(139, 92, 246, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* 基础卡片效果 */
+.report-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.4), transparent);
 }
 
 .report-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* 高亮卡片效果 */
+.report-card.highlight {
+  box-shadow: 0 0 30px rgba(14, 165, 233, 0.3), 
+              0 4px 12px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.report-card.highlight:hover {
+  box-shadow: 0 0 40px rgba(14, 165, 233, 0.4), 
+              0 6px 20px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* 报告内容滚动条样式 */
 .report-content::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .report-content::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(224, 224, 224, 0.5);
   border-radius: 3px;
 }
 
 .report-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(22, 93, 255, 0.3);
   border-radius: 3px;
 }
 
 .report-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(22, 93, 255, 0.5);
 }
 
 /* 表格样式增强 */
 .report-table {
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  background-color: var(--dark-bg);
 }
 
 .report-table .ant-table-thead > tr > th {
   font-weight: 600;
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.5px;
+  background-color: var(--dark-bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
 }
 
 .report-table .ant-table-tbody > tr:hover > td {
-  background-color: rgba(15, 23, 42, 0.8) !important;
+  background-color: var(--secondary-color) !important;
+  color: var(--text-primary) !important;
 }
 
 /* 加载状态的动画 */
@@ -83,25 +360,100 @@
   min-height: 200px;
 }
 
+/* 左右分栏布局 */
+.report-main-content {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  width: 100%;
+  height: calc(100vh - 100px);
+  overflow: hidden;
+}
+
+.report-left-column {
+  flex: 0 0 40%;  /* 左侧固定40%宽度 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--dark-bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.report-right-column {
+  flex: 0 0 60%;  /* 右侧固定60%宽度 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--dark-bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* 区域标题样式 */
+.report-section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+}
+
+/* 报告头部样式 */
+.report-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--dark-bg-secondary);
+}
+
+/* 报告内容样式 */
+.report-content {
+  padding: 24px;
+  min-height: 400px;
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+}
+
+/* 报告底部样式 */
+.report-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  background-color: var(--dark-bg-secondary);
+}
+
 /* 响应式设计 */
 @media (max-width: 1200px) {
+  .report-container {
+    padding: 15px;
+  }
+  
   .report-main-content {
     flex-direction: column;
     align-items: center;
   }
   
-  .report-column {
-    width: 100% !important;
-    max-width: 800px !important;
-    min-width: auto !important;
-    margin-bottom: 20px;
-  }
+  .report-left-column,
+.report-right-column {
+  width: 100% !important;
+  max-width: 800px !important;
+  min-width: auto !important;
+  margin-bottom: 20px;
+  flex: none;
+  background-color: var(--dark-bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
 }
 
 @media (max-width: 768px) {
   .report-container {
-    padding: 0 10px !important;
-    margin-top: 20px !important;
+    padding: 10px !important;
+    margin-top: 10px !important;
   }
   
   .report-title {
@@ -113,22 +465,49 @@
   }
   
   .report-card {
-    min-height: 300px !important;
+    min-height: 250px !important;
+  }
+  
+  .report-content {
+    padding: 15px !important;
+  }
+  
+  .report-header {
+    padding: 15px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   
   .report-footer {
     flex-wrap: wrap;
     justify-content: center !important;
+    padding: 12px !important;
   }
   
   .report-footer button {
     width: 45%;
     margin-bottom: 10px;
+    margin-left: 5px !important;
+    margin-right: 5px !important;
   }
   
   .report-footer button:last-child {
     width: 100%;
     margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-container {
+    padding: 8px !important;
+  }
+  
+  .report-footer button {
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }
 
@@ -138,19 +517,116 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* 报告操作按钮区域 */
+.report-action-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* 报告导出按钮 */
+.report-export-button {
+  transition: all 0.3s ease;
+}
+
+.report-export-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 报告复制按钮 */
+.report-copy-button {
+  transition: all 0.3s ease;
+}
+
+.report-copy-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.4);
+}
+
+/* 报告重新生成按钮 */
+.report-reset-button {
+  transition: all 0.3s ease;
+}
+
+.report-reset-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(250, 173, 20, 0.4);
+}
+
+/* 报告生成时间显示 */
+.report-generated-time {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-left: 16px;
+}
+
 /* 模态框样式增强 */
 .report-modal .ant-modal-header {
-  background-color: rgba(15, 23, 42, 0.9);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(30, 41, 59, 0.9);
+  border-bottom: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 12px 12px 0 0;
 }
 
 .report-modal .ant-modal-title {
-  color: #f0f0f0;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(14, 165, 233, 0.3);
 }
 
 .report-modal .ant-modal-body {
-  background-color: rgba(15, 23, 42, 0.7);
-  color: #f0f0f0;
+  background-color: rgba(15, 23, 42, 0.8);
+  color: #ffffff;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.report-modal .ant-modal-footer {
+  background-color: rgba(30, 41, 59, 0.9);
+  border-top: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 0 0 12px 12px;
+  padding: 12px 24px;
+}
+
+.report-modal .ant-modal-content {
+    border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(14, 165, 233, 0.2);
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.9));
+}
+
+/* 渐变动画效果 */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 脉动动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 悬停缩放动画 */
+@keyframes hoverScale {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.02);
+  }
 }
 
 /* 打印样式 */
@@ -161,7 +637,8 @@
   }
   
   .report-upload-section,
-  .report-footer {
+  .report-footer,
+  .report-action-buttons {
     display: none !important;
   }
   

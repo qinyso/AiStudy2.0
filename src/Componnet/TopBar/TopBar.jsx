@@ -52,29 +52,39 @@ const { Header } = Layout;
   },
   {
     key:'3',
-    label:'病灶分类',
-    path:'/upload',
+    label:'肾病病理分析',
     icon: <FileTextOutlined />,
+    children: [
+      {
+        key:'3-1',
+        label:'病灶分类',
+        path:'/upload',
+      },
+      {
+        key:'3-2',
+        label:'报告生成',
+        path:'/report',
+      },
+      {
+        key:'3-3',
+        label:'细胞核计数',
+        path:'/divide',
+      },
+    ],
   },
- {
+  {
     key:'4',
-    label:'报告生成',
-    path:'/report',
+    label:'脑部病理分析',
+    path:'/brain-pathology',
     icon: <MonitorOutlined />,
   },
   {
     key:'5',
-    label:'细胞核计数',
-    path:'/divide',
+    label:'其他病理分析',
+    path:'/other-pathology',
     icon: <FileImageOutlined />,
   },
-  {
-    key:'6',
-    label:'肾小球计数',
-    path:'/number',
-    icon: <TeamOutlined />,
-  },
-
+ 
 ];
 
 // 用户下拉菜单
@@ -102,10 +112,26 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
   const [current, setCurrent] = useState('1');
   const navigate = useNavigate();
   
+  // 递归查找菜单项（包括子菜单）
+  const findMenuItem = (items, key) => {
+    for (const item of items) {
+      if (item.key === key) {
+        return item;
+      }
+      if (item.children) {
+        const found = findMenuItem(item.children, key);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
+  };
+
   // 处理菜单点击
   const handleMenuClick = (e) => {
     setCurrent(e.key);
-    const selectedItem = menuItems.find(item => item.key === e.key);
+    const selectedItem = findMenuItem(menuItems, e.key);
     if (selectedItem && selectedItem.path) {
       navigate(selectedItem.path);
     }
@@ -113,8 +139,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
 
   // 与首页完全一致的头部背景样式
   const headerStyle = {
-    background: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #0f172a 100%)',
-    backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(2, 132, 199, 0.2) 0%, transparent 40%)',
+    backgroundColor: 'transparent',
     display: 'flex',
     alignItems: 'center',
     padding: '0 24px',
@@ -134,16 +159,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     letterSpacing: 0.5,
   };
   
-  // 搜索框样式
-  const searchStyle = {
-    width: 200,
-    background: 'rgba(255, 255, 255, 0.15)',
-    borderColor: 'rgba(14, 165, 233, 0.5)',
-    color: '#fff',
-    '&::placeholder': {
-      color: 'rgba(255, 255, 255, 0.7)',
-    },
-  };
+  
   
   // 菜单样式 - 确保完整显示菜单项并居中
   const menuStyle = {
@@ -151,29 +167,13 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
     border: 'none',
     flex: 1, // 让菜单占满可用空间
     minWidth: 0, // 允许菜单缩小
-    justifyContent: 'center', // 菜单居中显示
+    justifyContent: 'center',
+    color: '#ffffff' // 直接设置菜单文字颜色为白色
   };
   
-  // 简化的菜单项样式 - 与首页融为一体
-  const menuItemStyle = {
-    color: '#ffffff',
-    fontSize: '14px',
-    fontWeight: 500,
-    '&:hover': {
-      color: '#0ea5e9',
-      background: 'rgba(255, 255, 255, 0.1)',
-    },
-    '&.ant-menu-item-selected': {
-      color: '#ffffff',
-      background: 'linear-gradient(90deg, #0ea5e9, #0284c7)',
-    },
-  };
-
+  
   return (
     <Header style={headerStyle}>
-   
-      
-  
       <div style={logoStyle}>
         <span style={{ 
           background: 'transparent',
@@ -182,7 +182,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
           color: '#0ea5e9',
           textShadow: '0 0 10px rgba(14, 165, 233, 0.6)',
         }}>
-         AI肾病智能研究
+         AI病理分析系统
         </span>
       </div>
       
@@ -195,6 +195,7 @@ const TopBar = ({ collapsed = false, onToggle = () => {} }) => {
         style={menuStyle}
         overflowedIndicator={null} 
         ellipsis="false"
+        theme="dark" // 直接在Menu组件上设置深色主题
       />
       
       {/* 右侧功能区 */}

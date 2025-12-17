@@ -1,41 +1,41 @@
-// 主题配置 - 医疗蓝色系
+// 主题配置 - 科技感明亮系
 export const themeColors = {
-  // 主色调 - 医疗蓝色系
-  colorPrimary: '#0ea5e9',
+  // 主色调 - 科技感蓝色
+  colorPrimary: '#3b82f6',
   
   // 辅助色
-  colorSuccess: '#059669',
-  colorWarning: '#d97706',
-  colorError: '#dc2626',
-  colorInfo: '#0284c7',
+  colorSuccess: '#10b981',
+  colorWarning: '#f59e0b',
+  colorError: '#ef4444',
+  colorInfo: '#60a5fa',
   
   // 中性色
-  colorTextBase: '#ffffff',
-  colorTextSecondary: 'rgba(255, 255, 255, 0.8)',
-  colorTextTertiary: 'rgba(255, 255, 255, 0.6)',
-  colorTextQuaternary: 'rgba(255, 255, 255, 0.4)',
+  colorTextBase: '#1e293b',
+  colorTextSecondary: '#475569',
+  colorTextTertiary: '#94a3b8',
+  colorTextQuaternary: '#cbd5e1',
   
   // 背景色
-  colorBgBase: '#0f172a',
-  colorBgSecondary: '#0c4a6e',
-  colorBgTertiary: '#1e3a8a',
+  colorBgBase: '#f8fafc',
+  colorBgSecondary: '#ffffff',
+  colorBgTertiary: '#f1f5f9',
   
   // 边框色
-  colorBorder: 'rgba(14, 165, 233, 0.2)',
-  colorBorderSecondary: 'rgba(14, 165, 233, 0.1)',
+  colorBorder: 'rgba(203, 213, 225, 0.5)',
+  colorBorderSecondary: 'rgba(203, 213, 225, 0.3)',
   
-  // 渐变色彩 - 医疗蓝色系
+  // 渐变色彩 - 科技感蓝色系
   gradientColors: {
-    primary: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-    secondary: 'linear-gradient(135deg, #0c4a6e, #0ea5e9)',
-    accent: 'linear-gradient(135deg, #0284c7, #06b6d4)'
+    primary: 'linear-gradient(135deg, #3b82f6, #60a5fa)',
+    secondary: 'linear-gradient(135deg, #60a5fa, #93c5fd)',
+    accent: 'linear-gradient(135deg, #2563eb, #3b82f6)'
   },
   
   // 阴影
   boxShadow: {
     small: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    medium: '0 4px 6px -1px rgba(14, 165, 233, 0.1), 0 2px 4px -1px rgba(14, 165, 233, 0.06)',
-    large: '0 10px 15px -3px rgba(14, 165, 233, 0.1), 0 4px 6px -2px rgba(14, 165, 233, 0.05)'
+    medium: '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)',
+    large: '0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1)'
   }
 };
 

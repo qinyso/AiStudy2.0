@@ -1,11 +1,12 @@
 import './Upload.css';
-import React, { useState } from 'react';
-import { InboxOutlined, FileTextOutlined, FolderOutlined, LoadingOutlined } from '@ant-design/icons';
+import React, { useState, useRef, useEffect } from 'react';
+import { InboxOutlined, FileTextOutlined, FolderOutlined, LoadingOutlined, UploadOutlined, FileImageOutlined } from '@ant-design/icons';
 import { message, Upload, Button, Modal } from 'antd';
 const { Dragger } = Upload;
 import { Card } from 'antd';
 import { themeColors } from '../../theme';
-// 从localStorage获取token
+import axios from 'axios';
+
 const getToken = () => {
   return localStorage.getItem('token');
 };
@@ -280,16 +281,29 @@ const UploadComponent = () =>{
       input.click();
     };
     
-    // 上传组件样式
-    const uploadContainerStyle = {
-      marginTop: 40,
-      padding: '0 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      minHeight: '80vh',
-      width: '100%',
-    };
+    // 上传容器样式
+  const uploadContainerStyle = {
+    width: '100vw',
+    minHeight: '100vh',
+    padding: '20px',
+    background: 'rgba(15, 23, 42, 0.3)',
+    overflowX: 'hidden',
+    position: 'relative',
+    backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 20%), radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 20%)',
+  };
+  
+  // 背景模糊效果
+  const backgroundBlurStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%)',
+    zIndex: -1,
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+  };
     
     // 验证token是否存在
     const token = getToken();
@@ -302,6 +316,8 @@ const UploadComponent = () =>{
       gap: 20,
       alignItems: 'stretch', // 修改为stretch，使两个卡片高度相同
       justifyContent: 'center',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
     };
     
     // 左右两列的通用样式
@@ -312,230 +328,160 @@ const UploadComponent = () =>{
       flexDirection: 'column', // 确保内部元素也能占满高度
     };
 
-    // 拖拽上传区域样式
-    const draggerStyle = {
-      width: '100%',
-      borderRadius: 12,
-      border: `2px dashed ${themeColors.colorBorder}`,
-      background: 'rgba(15, 23, 42, 0.7)',
-      minHeight: '400px', // 设置与右侧卡片相同的最小高度
-      display: 'flex', // 添加flex布局
-      flexDirection: 'column', // 垂直排列内容
-      alignItems: 'center', // 水平居中
-      justifyContent: 'center', // 垂直居中
-      padding: '20px', // 添加内边距
-      '&:hover': {
-        borderColor: themeColors.colorPrimary,
-        boxShadow: themeColors.boxShadow.medium,
-      }
-    };
+  
+    
 
-    // 卡片样式
-    const cardStyle = {
-      width: '100%',
-      borderRadius: 12,
-      border: `1px solid ${themeColors.colorBorder}`,
-      background: 'rgba(15, 23, 42, 0.7)',
-      boxShadow: themeColors.boxShadow.medium,
-      minHeight: '400px', // 增加最小高度，使界面更加美观
-      display: 'flex',
-      flexDirection: 'column',
-      margin: 0, // 移除默认边距
-    };
-
-    // 标题样式
-    const titleStyle = {
-      fontSize: 24,
-      fontWeight: 600,
-      color: themeColors.colorPrimary,
-      marginBottom: 20,
-      textAlign: 'center',
-    };
-
-    // 列表样式
-    const listStyle = {
-      paddingLeft: 20,
-      color: themeColors.colorTextSecondary,
-    };
     
     return (
-        <div style={uploadContainerStyle}>
-          <h1 style={titleStyle}>病理图片上传与分析</h1>
+        <div className="upload-container">
+          {/* 背景模糊效果 */}
+          <div className="upload-background-blur"></div>
           
-          <div style={mainContentStyle}>
-            {/* 左侧：上传区域 */}
-            <div style={columnStyle}>
-              <Dragger {...props} style={draggerStyle} onClick={openUploadModal} disabled={isProcessing}>
-                <p className="ant-upload-drag-icon" style={{ fontSize: '48px', color: isProcessing ? themeColors.colorTextTertiary : themeColors.colorPrimary }}>
-                  {isProcessing ? <LoadingOutlined spin /> : <FileTextOutlined />}
-                </p>
-                <p className="ant-upload-text" style={{ color: themeColors.colorTextBase, fontSize: 18 }}>
-                  {isProcessing ? '正在处理图片...' : '点击选择上传方式'}
-                </p>
-                <p className="ant-upload-hint" style={{ color: themeColors.colorTextTertiary }}>
-                  {isProcessing ? '正在分析图片，请稍候...' : '支持单个文件、多个文件或整个文件夹上传病理图片。'}
-                </p>
-                
-                {/* 快速上传提示 */}
-                <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <Button 
-                    type="primary" 
-                    icon={<FileTextOutlined />}
-                    onClick={(e) => { e.stopPropagation(); handleFileUpload(); }}
-                    style={{ maxWidth: '300px', alignSelf: 'center' }}
-                    disabled={isProcessing}
-                  >
-                    上传图片文件
-                  </Button>
-                  <Button 
-                    icon={<FolderOutlined />}
-                    onClick={(e) => { e.stopPropagation(); handleFolderUpload(); }}
-                    style={{ maxWidth: '300px', alignSelf: 'center' }}
-                    disabled={isProcessing}
-                  >
-                    上传文件夹
-                  </Button>
+          {/* 上传方式选择弹窗 */}
+          <Modal
+            title="选择上传方式"
+            open={uploadModalVisible}
+            onCancel={closeUploadModal}
+            footer={null}
+            width={400}
+            className="upload-modal"
+          >
+            <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+              <Button 
+                className="upload-button upload-button-primary"
+                size="large"
+                icon={<FileTextOutlined />}
+                onClick={handleFileUpload}
+              >
+                上传图片文件
+              </Button>
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: 14, margin: '0 auto' }}>
+                支持 .jpg, .jpeg, .png, .gif, .bmp 格式图片
+              </p>
+              
+              <Button 
+                className="upload-button upload-button-secondary"
+                size="large"
+                icon={<FolderOutlined />}
+                onClick={handleFolderUpload}
+              >
+                上传整个文件夹
+              </Button>
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: 14, margin: '0 auto' }}>
+                自动识别文件夹中的所有图片文件
+              </p>
+            </div>
+          </Modal>
+          
+          {/* 主要内容区域 */}
+          <div className="upload-main-content">
+            {/* 上部：图像上传与展示区域 */}
+            <div className="upload-image-section">
+              <h1 className="upload-title">病理图片上传与分析</h1>
+              
+              {/* 上传区域 */}
+              {!analysisResults.uploaded ? (
+                <div className="upload-card upload-area-card">
+                  <div className="upload-card-content">
+                    <Dragger {...props} className={`upload-dragger ${isProcessing ? 'disabled' : ''}`} onClick={openUploadModal} disabled={isProcessing}>
+                      <p className="ant-upload-drag-icon upload-drag-icon">
+                        {isProcessing ? <LoadingOutlined spin /> : <FileTextOutlined />}
+                      </p>
+                      <p className="ant-upload-text upload-drag-text">
+                        {isProcessing ? '正在处理图片...' : '点击选择上传方式'}
+                      </p>
+                      <p className="ant-upload-hint upload-drag-hint">
+                        {isProcessing ? '正在分析图片，请稍候...' : '支持单个文件、多个文件或整个文件夹上传病理图片。'}
+                      </p>
+                    </Dragger>
+                  </div>
                 </div>
-              </Dragger>
+              ) : (
+                /* 图像展示区域 */
+                <div className="upload-image-container">
+                  <div className="upload-image-box">
+                    <div className="upload-image-title">原始图像</div>
+                    {/* 这里可以添加图像预览 */}
+                    <div className="upload-image-placeholder">
+                      <FileImageOutlined style={{ fontSize: '48px', color: 'rgba(255, 255, 255, 0.3)' }} />
+                      <p>原始病理图像</p>
+                    </div>
+                  </div>
+                  
+                  <div className="upload-image-box">
+                    <div className="upload-image-title">分析结果</div>
+                    {/* 这里可以添加分析后的图像预览 */}
+                    <div className="upload-image-placeholder">
+                      <FileImageOutlined style={{ fontSize: '48px', color: 'rgba(255, 255, 255, 0.3)' }} />
+                      <p>AI分析结果图像</p>
+                    </div>
+                    {/* 图例 */}
+                    <div className="upload-legend">
+                      <div className="upload-legend-item">
+                        <div className="upload-legend-color" style={{ backgroundColor: '#ff0000' }}></div>
+                        <span>肿瘤区域</span>
+                      </div>
+                      <div className="upload-legend-item">
+                        <div className="upload-legend-color" style={{ backgroundColor: '#0000ff' }}></div>
+                        <span>正常组织</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
-            {/* 上传方式选择弹窗 */}
-            <Modal
-              title="选择上传方式"
-              open={uploadModalVisible}
-              onCancel={closeUploadModal}
-              footer={null}
-              width={400}
-            >
-              <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  icon={<FileTextOutlined />}
-                  onClick={handleFileUpload}
-                  style={{ width: '80%', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  上传图片文件
-                </Button>
-                <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto' }}>
-                  支持 .jpg, .jpeg, .png, .gif, .bmp 格式图片
-                </p>
-                
-                <Button 
-                  size="large"
-                  icon={<FolderOutlined />}
-                  onClick={handleFolderUpload}
-                  style={{ width: '80%', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  上传整个文件夹
-                </Button>
-                <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: '0 auto' }}>
-                  自动识别文件夹中的所有图片文件
-                </p>
-              </div>
-            </Modal>
-            
-            {/* 右侧：分析结果卡片 */}
-            <div style={columnStyle}>
-              <Card style={cardStyle}>
-            <div>
-              <h2 style={{ color: themeColors.colorPrimary, fontSize: 20, marginBottom: 15, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={themeColors.colorPrimary} strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                  <path d="M13 16l-3-3m0 0l3-3m-3 3v6"/>
-                </svg>
-                病理图像分析结果
-              </h2>
-              
+            {/* 下部：分析结果卡片 */}
+            <div className="upload-results-section">
+              <Card className="upload-card result-card">
+                <div className="upload-card-content">
+                  <h2 className="upload-results-title">分析结果</h2>
+          
               {!analysisResults.uploaded ? (
-                <p style={{ color: themeColors.colorTextSecondary, marginBottom: 15, fontSize: 16, textAlign: 'center', padding: '20px' }}>
+                <p style={{ color: 'white', marginBottom: 15, fontSize: 16, textAlign: 'center', padding: '20px' }}>
                   请上传病理图片以获取AI分析结果
                 </p>
               ) : (
                 <>
-                  <p style={{ color: themeColors.colorTextSecondary, marginBottom: 15, fontSize: 16 }}>AI辅助诊断系统已完成对您上传病理切片的分析，结果如下：</p>
-                  
                   {/* 显示处理统计信息 */}
                   {analysisResults.processingTime && (
-                    <div style={{ marginBottom: 20, padding: '10px', backgroundColor: 'rgba(15, 23, 42, 0.5)', borderRadius: 8 }}>
-                      <p style={{ color: themeColors.colorTextSecondary, marginBottom: 5, fontSize: 14 }}><strong>处理信息：</strong></p>
-                      <p style={{ color: themeColors.colorTextTertiary, fontSize: 14, margin: 0 }}>{analysisResults.processingTime}</p>
+                    <div className="upload-processing-info">
+                      <p className="upload-info-label">处理信息：</p>
+                      <p className="upload-info-value">{analysisResults.processingTime}</p>
                     </div>
                   )}
                   
                   {/* 显示预测结果详情 */}
                   {analysisResults.predictions && analysisResults.predictions.length > 0 && (
-                    <div style={{ marginBottom: 20, padding: '15px', backgroundColor: 'rgba(15, 23, 42, 0.5)', borderRadius: 8 }}>
-                      <p style={{ color: themeColors.colorTextSecondary, marginBottom: 10, fontSize: 14 }}><strong>预测结果详情：</strong></p>
-                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                        {analysisResults.predictions.map((prediction, index) => {
-                          // 获取对应的文件名
-                          const fileName = analysisResults.uploadedFiles[index] ? analysisResults.uploadedFiles[index].name : `Image ${index + 1}`;
-                          
-                          // 根据预测类别设置样式
-                          let categoryStyle = { color: themeColors.colorTextTertiary };
-                          let categoryText = prediction.category;
-                          
-                          // 创建英文名称到中文翻译的映射
-                          const categoryTranslations = {
+                    <div className="upload-prediction-summary">
+                      <div className="upload-prediction-item">
+                        <span className="upload-prediction-label">肿瘤类型：</span>
+                        <span className={`upload-prediction-value ${analysisResults.predictions[0].category}`}>
+                          {{
                             'no_tumor': '无肿瘤',
                             'meningioma_tumor': '脑膜瘤',
                             'glioma_tumor': '胶质瘤',
                             'pituitary_tumor': '垂体瘤'
-                          };
-                           
-                          // 在英文名称后面添加中文翻译
-                          if (prediction.category === 'no_tumor') {
-                            categoryStyle = { color: themeColors.colorSuccess };
-                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
-                          } else if (prediction.category === 'meningioma_tumor') {
-                            categoryStyle = { color: themeColors.colorWarning };
-                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
-                          } else if (prediction.category === 'glioma_tumor') {
-                            categoryStyle = { color: themeColors.colorError };
-                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
-                          } else if (prediction.category === 'pituitary_tumor') {
-                            categoryStyle = { color: themeColors.colorPrimary };
-                            categoryText = `${prediction.category} (${categoryTranslations[prediction.category]})`;
-                          } else {
-                            // 对于未知类型，保持英文名称不变
-                            categoryText = prediction.category;
-                          }
-                          
-                          return (
-                            <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: index < analysisResults.predictions.length - 1 ? `1px solid ${themeColors.colorBorder}` : 'none' }}>
-                              <span style={{ fontSize: 13, color: themeColors.colorTextTertiary, maxWidth: '60%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {fileName}
-                              </span>
-                              <span style={{ fontSize: 13, ...categoryStyle, fontWeight: 'bold' }}>
-                                {categoryText}
-                              </span>
-                            </div>
-                          );
-                        })}
+                          }[analysisResults.predictions[0].category] || analysisResults.predictions[0].category}
+                        </span>
                       </div>
                     </div>
                   )}
                   
-                  <div style={{ marginBottom: 20, padding: '15px', backgroundColor: 'rgba(5, 150, 105, 0.1)', borderRadius: 8, borderLeft: `4px solid ${themeColors.colorSuccess}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                      <span style={{ fontWeight: 'bold', color: themeColors.colorSuccess, fontSize: 18 }}>正常组织</span>
-                      <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: themeColors.colorSuccess, color: 'white', fontSize: 12 }}>{analysisResults.normalPercent}%</span>
+                  <div className="upload-results-stats">
+                    <div className="upload-stat-item">
+                      <div className="upload-stat-label">肿瘤区域占比：</div>
+                      <div className="upload-stat-value">{analysisResults.abnormalPercent || 0}%</div>
                     </div>
-                    <p style={{ color: themeColors.colorTextTertiary, marginTop: '5px', fontSize: 14 }}>{analysisResults.normalDescription}</p>
+                    <div className="upload-stat-item">
+                      <div className="upload-stat-label">正常组织占比：</div>
+                      <div className="upload-stat-value">{analysisResults.normalPercent || 0}%</div>
+                    </div>
                   </div>
                   
-                  <div style={{ marginBottom: 20, padding: '15px', backgroundColor: 'rgba(220, 38, 38, 0.1)', borderRadius: 8, borderLeft: `4px solid ${themeColors.colorError}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                      <span style={{ fontWeight: 'bold', color: themeColors.colorError, fontSize: 18 }}>异常区域</span>
-                      <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: themeColors.colorError, color: 'white', fontSize: 12 }}>{analysisResults.abnormalPercent}%</span>
-                    </div>
-                    <p style={{ color: themeColors.colorTextTertiary, marginTop: '5px', fontSize: 14 }}>{analysisResults.abnormalDescription}</p>
-                  </div>
-                  
-                  <div style={{ padding: '15px', backgroundColor: 'rgba(217, 119, 6, 0.1)', borderRadius: 8, borderLeft: `4px solid ${themeColors.colorWarning}` }}>
-                    <p style={{ color: themeColors.colorTextSecondary, fontSize: 14, margin: 0 }}>
-                      <strong style={{ color: themeColors.colorWarning }}>临床建议：</strong>
+                  <div className="upload-status-card recommendation">
+                    <p className="upload-status-recommendation">
+                      <strong>临床建议：</strong>
                       {analysisResults.recommendation}
                     </p>
                   </div>

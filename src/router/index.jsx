@@ -21,22 +21,25 @@ const PrivateRoute = () => {
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <Routes> 
       {/* 公开路由 */}
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Register />} />
       <Route path="/enter" element={<Enter />} />
-      
-      {/* 需要登录的私有路由 */}
-      <Route element={<PrivateRoute/>}>
+        <Route path="/report" element={<Report />} />      
         <Route path="/get" element={<Get />} />
         <Route path="/field" element={<Field />} />
         <Route path="/single" element={<Single />} />
         <Route path="/AIchat" element={<AIchat />} />
-        <Route path="/upload" element={<Upload />} />
-      <Route path="/report" element={<Report />} />
+      <Route path="/upload" element={<Upload />} />
       <Route path="/divide" element={<Divide />} />
       <Route path="/number" element={<Number />} />
+      {/* 病理分析相关路由 */}
+      <Route path="/brain-pathology" element={<Navigate to="/" replace />} />
+      <Route path="/other-pathology" element={<Navigate to="/" replace />} />
+      {/* 需要登录的私有路由 */}
+      <Route element={<PrivateRoute/>}>
+      
       </Route>
       
       {/* 404 页面 - 重定向到首页 */}                     
