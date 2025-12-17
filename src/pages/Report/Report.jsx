@@ -124,15 +124,23 @@ const ReportComponent = () => {
   const handleFileSelect = async (files) => {
     if (!files || files.length === 0) return;
     
+    // 支持的文件扩展名
+    const ALLOWED_EXTENSIONS = ['.svs', '.tif', '.tiff', '.ndpi', '.mrxs', '.vsi'];
+    
     // 过滤出有效的病理WSI格式文件
     const imageFiles = Array.from(files).filter(file => {
-      const isValidType = ALLOWED_FILE_TYPES.includes(file.type);
+      // 检查文件扩展名
+      const fileName = file.name.toLowerCase();
+      const hasValidExtension = ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
+      
+      // 检查文件大小
       const isValidSize = file.size <= MAX_FILE_SIZE;
-      return isValidType && isValidSize;
+      
+      return hasValidExtension && isValidSize;
     });
     
     if (imageFiles.length === 0) {
-      message.error('请选择有效的病理WSI格式文件 (SVS, TIFF, NDPI, MRXS, VSI), 大小不超过50MB');
+      message.error('请选择有效的病理WSI格式文件 (SVS, TIFF, NDPI, MRXS, VSI), 大小不超过1GB');
       return;
     }
     
@@ -557,7 +565,6 @@ const ReportComponent = () => {
           <div className="report-upload-section">
             {/* 上传容器 */}            <Upload.Dragger
               {...uploadProps}
-              onClick={openUploadModal}
               disabled={reportData.generating}
               className="report-upload-dragger"
               style={{
@@ -586,7 +593,7 @@ const ReportComponent = () => {
               }}
             >
               {uploadedFiles.length === 0 ? (
-                <div style={{ textAlign: 'center', zIndex: 1 }}>
+                <div style={{ textAlign: 'center', zIndex: 1, cursor: 'pointer' }} onClick={openUploadModal}>
                   <div style={{
                     width: '80px',
                     height: '50px',
@@ -625,9 +632,9 @@ const ReportComponent = () => {
                       type="primary"
                       icon={<FileTextOutlined />} 
                       className="report-action-button"
-                      onClick={() => {
-                        const uploadInput = document.querySelector('.ant-upload input');
-                        if (uploadInput) uploadInput.click();
+                      onClick={(e) => {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        handleFileUpload(); // 使用统一的文件上传处理函数
                       }}
                       style={{
                         background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
@@ -650,7 +657,10 @@ const ReportComponent = () => {
                     <Button 
                       icon={<FolderOutlined />} 
                       className="report-action-button"
-                      onClick={() => message.info('暂不支持文件夹上传')}
+                      onClick={(e) => {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        message.info('暂不支持文件夹上传');
+                      }}
                       style={{
                         backgroundColor: MEDICAL_THEME.background,
                         borderColor: MEDICAL_THEME.border,
